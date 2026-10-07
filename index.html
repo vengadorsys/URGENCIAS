@@ -74,6 +74,8 @@ section.panel{display:grid;gap:18px;padding-top:20px}
 .score span{font-size:.8rem;color:var(--muted)}
 .ecg-box{border-radius:8px;overflow:hidden;border:1px solid var(--grid-major);background:var(--paper)}
 .ecg-box svg{display:block;width:100%;height:auto}
+.strips{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.strips.multi{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
 .lead{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);padding:4px 8px}
 .ctx{color:var(--muted);font-style:italic}
 .answer-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -139,12 +141,20 @@ ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
 
   <!-- ============ ECG ============ -->
   <section class="panel" id="p-ecg" hidden>
-    <p class="note">Mira el trazo y escribe qué es (ej. «Mobitz II», «FV», «IAMCEST»). Se aceptan sinónimos. Velocidad 25 mm/s: cuadro chico 0.04 s, cuadro grande 0.20 s. Los trazos son esquemas dibujados por código, no registros reales.</p>
+    <p class="note">Mira el trazo y elige qué es. Pulsa <strong>Nuevo electro</strong> para que salga otro al azar. Velocidad 25 mm/s: cuadro chico 0.04 s, cuadro grande 0.20 s. Los trazos son esquemas dibujados por código, no registros reales; los marcados como «complemento» no venían en tus diapositivas.</p>
     <div class="bar">
+      <button class="btn" id="ecgNew">Nuevo electro</button>
+      <select id="ecgGroup" class="chip" aria-label="Tipo de ECG">
+        <option value="all">Todos los ECG</option>
+        <option value="isq">Isquemia / infarto</option>
+        <option value="taqui">Taquiarritmias</option>
+        <option value="bradi">Bradicardias y bloqueos</option>
+        <option value="paro">Ritmos de paro</option>
+        <option value="otros">Otros (electrolitos, TEP…)</option>
+      </select>
       <button class="chip" id="ctxToggle" aria-pressed="true">Mostrar caso clínico</button>
-      <span class="note" id="ecgScore"></span>
     </div>
-    <div class="progress"><i id="ecgBar"></i></div>
+    <div class="score" id="ecgScore"></div>
     <div id="ecgArea"></div>
   </section>
 
@@ -433,6 +443,16 @@ function qrsT(t,q,m,rr){
     case "hyperK": y+=G(t,q+.015,.012,-.08)+G(t,q+.05,.02,.95)+G(t,q+.095,.022,-.35)+G(t,q+.27,.028,1.05);break;
     case "leadI": y+=G(t,q+.035,.011,.55)+G(t,q+.07,.014,-.65)+G(t,q+tc,.045,.2);break;
     case "leadIII": y+=G(t,q+.015,.012,-.38)+G(t,q+.05,.012,.65)+G(t,q+.075,.01,-.1)+G(t,q+tc,.05,-.28);break;
+    case "brd": y+=G(t,q+.02,.01,.3)+G(t,q+.05,.012,-.45)+G(t,q+.1,.022,.9)+G(t,q+.32,.05,-.25);break;
+    case "brdI": y+=G(t,q+.03,.012,.8)+G(t,q+.09,.03,-.35)+G(t,q+tc,.05,.25);break;
+    case "bri": y+=G(t,q+.025,.012,.12)+G(t,q+.09,.04,-1.3)+.12*win(t,q+.15,q+.28,.015)+G(t,q+.34,.06,.45);break;
+    case "briV6": y+=G(t,q+.05,.025,.8)+G(t,q+.1,.025,.9)-.1*win(t,q+.15,q+.26,.015)+G(t,q+.34,.06,-.35);break;
+    case "post": y+=G(t,q+.035,.014,.95)+G(t,q+.07,.012,-.15)-.2*win(t,q+.08,q+.22,.015)+G(t,q+.3,.05,.25);break;
+    case "wellens": y+=G(t,q+.012,.008,-.06)+G(t,q+.04,.011,.9)+G(t,q+.065,.01,-.3)+G(t,q+.3,.06,-.6);break;
+    case "qwave": y+=G(t,q+.02,.015,-.6)+G(t,q+.055,.012,.35)+G(t,q+.08,.01,-.1)+G(t,q+tc,.05,-.3);break;
+    case "avr": y+=G(t,q+.012,.008,.1)+G(t,q+.04,.012,-1.0)+.22*win(t,q+.07,q+.24,.015)+G(t,q+.3,.05,-.1);break;
+    case "qt": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)+.04*win(t,q+.08,q+.4,.02)+G(t,q+.5,.07,.28);break;
+    case "hipoK": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)-.08*win(t,q+.08,q+.2,.015)+G(t,q+.26,.05,.1)+G(t,q+.47,.05,.22);break;
     default: y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)+G(t,q+tc,.045,.3);
   }
   return y;
@@ -442,7 +462,8 @@ function beats(spec,dur){
   const reg=(rr,pr,jit)=>{let t=-1;while(t<dur+1){ev.push({p:pr==null?null:t-pr,q:t,m,rr});t+=rr+(jit?(Math.random()-.5)*jit:0)}};
   switch(spec.r){
     case "sinus": reg(spec.rr,spec.pr??.16,.02);break;
-    case "nop": reg(spec.rr,null,0);break;
+    case "nop": case "flutter": reg(spec.rr||.8,null,0);break;
+    case "pvc":{let t=-1,k=0;while(t<dur+1){ev.push(k%3===2?{p:null,q:t-.3,m:"wide",rr:.8}:{p:t-.16,q:t,m,rr:.8});k++;t+=spec.rr}break}
     case "af":{let t=-1;while(t<dur+1){const rr=.38+Math.random()*.55;ev.push({p:null,q:t,m,rr});t+=rr}break}
     case "w1":{let t=-1.2,k=0;const prs=[.16,.26,.32];while(t<dur+1){if(k<3){ev.push({p:t,q:t+prs[k],m,rr:.8})}else ev.push({p:t,q:null});k=(k+1)%4;t+=.78}break}
     case "w2":{let t=-1.2,k=0;while(t<dur+1){ev.push(k<2?{p:t,q:t+.16,m:"semi",rr:.8}:{p:t,q:null});k=(k+1)%3;t+=.72}break}
@@ -463,6 +484,7 @@ function signal(spec,dur,fs){
       if(e.p!=null&&Math.abs(t-e.p)<.2)v+=G(t,e.p+.045,.022,pAmp);
       if(e.q!=null&&t>e.q-.1&&t<e.q+.6)v+=qrsT(t,e.q,e.m,e.rr);
     }
+    if(spec.r==="flutter"){const x=((t*5)%1+1)%1;v+=-.22*((x<.75?x/.75:(1-x)/.25)-.5)}
     if(spec.r==="af")v+=.045*(Math.sin(6.28*6.3*t)+.7*Math.sin(6.28*8.7*t+1)+.5*Math.sin(6.28*5.1*t+2));
     v+=(Math.random()-.5)*.012;
     y[i]=v}
@@ -485,64 +507,84 @@ $("#hero").innerHTML=`<div style="height:46px;overflow:hidden;border-radius:6px"
 $("#hero svg").style.height="46px";$("#hero svg").style.width="100%";$("#hero svg").setAttribute("preserveAspectRatio","none");
 
 /* ================= ECG CASOS ================= */
+const R=(r,o={})=>Object.assign({r},o);
+const SIN=(m,o={})=>R("sinus",Object.assign({rr:.85,m},o));
 const E=[
- {n:"Ritmo sinusal normal",s:[{r:"sinus",rr:.8}],lead:["DII"],ok:/(sinusal normal|ritmo sinusal$|^normal$|^ritmo normal$|^sinusal$|ecg normal)/,no:/taqui|bradi/,ctx:"Chequeo preoperatorio, asintomático.",hint:"Cuenta: ~4 cuadros grandes entre R, P antes de cada QRS, PR y QRS normales.",f:["FC ~75 lpm, regular","P antes de cada QRS, PR 0.16 s","QRS estrecho, ST isoeléctrico"],a:"Nada que tratar."},
- {n:"Taquicardia sinusal",s:[{r:"sinus",rr:.5,pr:.14}],lead:["DII"],ok:/taqui\w* sinusal/,ctx:"Mujer con fiebre y deshidratación.",hint:"Hay P antes de cada QRS… ¿y la frecuencia?",f:["FC ~120 lpm, regular","P normal antes de cada QRS","QRS estrecho"],a:"Buscar y tratar la causa (fiebre, dolor, hipovolemia, TEP…)."},
- {n:"Bradicardia sinusal",s:[{r:"sinus",rr:1.35}],lead:["DII"],ok:/bradi\w* sinusal/,ctx:"Deportista de 22 años, asintomático.",hint:"Todo normal salvo la distancia entre R.",f:["FC ~45 lpm","P antes de cada QRS, PR normal","QRS estrecho"],a:"Asintomático: observar. Inestable: atropina 1 mg."},
- {n:"IAMCEST (elevación del ST)",s:[{r:"sinus",rr:.85,m:"stemi"}],lead:["V2"],ok:/iamcest|stemi|elevacion\w* (del )?st|st (elevad|ele)|supradesnivel|infarto (agudo )?con elevacion|lesion subepicardica/,ctx:"Hombre 58 años, dolor opresivo retroesternal de 40 min con diaforesis.",hint:"Fíjate en lo que pasa justo después del QRS: ¿está en la línea de base?",f:["ST↑ convexo («lomo de delfín»)","Criterio: ≥2 derivaciones contiguas (V2–V3 ≥2 mm hombre ≥40)"],a:"Reperfusión: ICP ≤90 min (fibrinólisis si no hay ICP). AAS + P2Y12 + heparina."},
- {n:"SCASEST: depresión del ST con T invertida",s:[{r:"sinus",rr:.85,m:"stdep"}],lead:["V5"],ok:/iamsest|scasest|nstemi|sca sin elevacion|angina inestable|(depresion|descenso|infradesnivel)\w* (del )?st|st (deprim|descend|infra)|isquemia subendocardica|t invertida/,ctx:"Mujer 67 años, dolor torácico en reposo hace 2 h.",hint:"Mira el segmento entre el QRS y la T, y hacia dónde apunta la T.",f:["ST↓ horizontal","T invertida","Sin ST↑ persistente"],a:"ECG y troponina hs seriados; antiagregación + anticoagulación; estratificar riesgo. Troponina ↑ = IAMSEST; normal = angina inestable."},
- {n:"Onda T hiperaguda (IAMCEST muy temprano)",s:[{r:"sinus",rr:.85,m:"hyperT"}],lead:["V3"],ok:/hiperagud/,ctx:"Hombre 50 años, dolor opresivo que empezó hace 15 minutos.",hint:"El QRS está bien. ¿Cómo es la T: estrecha y picuda, o alta, ancha y simétrica?",f:["T alta, ancha y simétrica","ST todavía casi isoeléctrico","Contexto de dolor de minutos"],a:"Repetir ECG en minutos; tratar como IAMCEST si evoluciona."},
- {n:"Hiperkalemia",s:[{r:"sinus",rr:.85,pr:.24,m:"hyperK"}],lead:["V4"],ok:/hiperk|hipercalem|hiperpotas|potasio alto|k alto/,ctx:"Paciente en hemodiálisis que faltó a 2 sesiones.",hint:"La T es estrecha y en «tienda de campaña»; P casi plana, QRS algo ancho.",f:["T picudas, estrechas, simétricas","P aplanada y PR largo","QRS ensanchado"],a:"Calcio IV para estabilizar la membrana; después bajar K⁺ (complemento)."},
- {n:"Fibrilación auricular",s:[{r:"af"}],lead:["DII"],ok:/(^| )fa( |$)|fibrilacion auricular|fibrilacion atrial|fa con respuesta/,ctx:"Mujer 74 años con palpitaciones.",hint:"¿Son iguales las distancias entre R? ¿Hay P?",f:["Irregularmente irregular","Sin ondas P; línea basal ondulante","QRS estrecho"],a:"Si inestable: cardioversión sincronizada (complemento)."},
- {n:"Taquicardia supraventricular paroxística (TSVP)",s:[{r:"nop",rr:.31}],lead:["DII"],ok:/tsv|supraventricular|trnav|trav|reentrada (intra)?nodal/,ctx:"Mujer 29 años, palpitaciones de inicio súbito; PA 118/76.",hint:"QRS estrecho, muy rápido y perfectamente regular. ¿Ves P?",f:["~190 lpm, regular","QRS estrecho","P no visibles (ocultas)"],a:"Estable: vagales → adenosina 6 mg → 12 mg. Inestable: cardioversión sincronizada."},
- {n:"Taquicardia ventricular monomórfica",s:[{r:"nop",rr:.3,m:"vt"}],lead:["DII"],ok:/(^| )tv( |$)|taquicardia ventricular|tv monomorf/,no:/polimorf|torsad|fibril/,ctx:"Hombre 70 años con infarto antiguo, palpitaciones y mareo.",hint:"QRS ancho (>3 cuadros chicos), regular y rápido; todos iguales.",f:["~200 lpm, regular","QRS ancho (>120 ms), todos iguales","Sin P visibles"],a:"Sin pulso: desfibrilar. Inestable: cardioversión sincronizada. Estable: procainamida o amiodarona 150 mg."},
- {n:"TV polimórfica (torsades de pointes)",s:[{r:"tdp"}],lead:["DII"],ok:/torsad|torcid|puntas|polimorf/,ctx:"Mujer con QT largo por fármacos; síncope.",hint:"La amplitud crece y decrece como girando alrededor de la línea.",f:["QRS ancho que «gira» alrededor de la basal","Amplitud variable","Muy rápida"],a:"Sin pulso o sostenida: choque NO sincronizado. Magnesio IV, corregir K⁺ y QT."},
- {n:"Fibrilación ventricular",s:[{r:"vf"}],lead:["DII"],ok:/(^| )fv( |$)|fibrilacion ventricular/,ctx:"Hombre se desploma en sala de espera; sin pulso.",hint:"¿Puedes identificar P, QRS o T?",f:["Ondas caóticas, sin P, QRS ni T","Sin pulso"],a:"Desfibrilar de inmediato (200 J bifásico) + RCP. Adrenalina tras 2.º choque, amiodarona 300 mg tras el 3.º."},
- {n:"Asistolia",s:[{r:"asys"}],lead:["DII"],ok:/asistol|linea (isoelectrica|plana)/,ctx:"Paciente sin pulso; confirmas en 2 derivaciones y revisas cables y ganancia.",hint:"Casi no hay nada que medir.",f:["Línea casi plana","Sin actividad ventricular ni pulso"],a:"NO desfibrilar. RCP + adrenalina 1 mg c/3–5 min y tratar causas."},
- {n:"BAV de 1.er grado",s:[{r:"sinus",rr:.95,pr:.32}],lead:["DII"],ok:/(primer|1 ?(er|ro)?|i) grado|bav (1|i)\b|bloqueo (av )?(de )?(1|primer)/,no:/mobitz|segundo|tercer|wenck/,ctx:"Hombre 60 años asintomático, toma β-bloqueador.",hint:"Todas las P conducen. Mide la distancia entre P y QRS.",f:["PR >0.20 s (aquí ~0.32 s), constante","Todas las P seguidas de QRS"],a:"Observar y corregir causa."},
- {n:"BAV 2.º grado Mobitz I (Wenckebach)",s:[{r:"w1"}],lead:["DII"],ok:/wenc?k?ebach|wenkebach|mobitz (tipo )?(1|i)\b|segundo grado tipo (1|i)\b|2 ?(do|o)? grado tipo (1|i)\b|mobitz uno/,ctx:"Mujer 66 años con IAM inferior, mareo leve.",hint:"Mide el PR latido por latido antes de la P que no conduce.",f:["PR que se alarga progresivamente","Una P sin QRS y el ciclo se reinicia","QRS estrecho"],a:"Asintomático: observar. Con compromiso: atropina 1 mg, marcapasos transcutáneo."},
- {n:"BAV 2.º grado Mobitz II",s:[{r:"w2"}],lead:["DII"],ok:/mobitz (tipo )?(2|ii)\b|segundo grado tipo (2|ii)\b|2 ?(do|o)? grado tipo (2|ii)\b|mobitz dos/,ctx:"Hombre 72 años con síncopes.",hint:"Mira si el PR cambia antes de la P bloqueada.",f:["PR fijo","P que de pronto no conduce","QRS algo ancho (infranodal)"],a:"Monitor + marcapasos. La atropina suele fallar."},
- {n:"BAV de 3.er grado (completo)",s:[{r:"av3"}],lead:["DII"],ok:/(tercer|3 ?(er|ro)?) grado|completo|disociacion (av|auriculoventricular)/,ctx:"Mujer 80 años, FC 38, confusa, PA 80/50.",hint:"Marca las P con una regla. ¿Tienen alguna relación con los QRS?",f:["P regulares (~95/min) y QRS regulares lentos (~39/min)","Sin relación entre P y QRS","QRS ancho (escape ventricular)"],a:"Inestable: marcapasos (transvenoso temporal); atropina/epinefrina/dopamina de puente."},
- {n:"TEP: taquicardia sinusal con S1Q3T3",s:[{r:"sinus",rr:.52,pr:.14,m:"leadI"},{r:"sinus",rr:.52,pr:.14,m:"leadIII"}],lead:["DI","DIII"],ok:/(^| )tep( |$)|tromboembolia|embolia pulmonar|tromboembolismo|s1 ?q3 ?t3/,ctx:"Mujer 2 semanas posparto, disnea súbita y dolor pleurítico; SatO₂ 88%.",hint:"Compara DI y DIII: S profunda en una, Q y T negativa en la otra.",f:["Taquicardia sinusal (~115 lpm)","S profunda en DI","Q y T invertida en DIII"],a:"Probabilidad alta → AngioTAC y anticoagular. Inestable → alteplasa 100 mg en 2 h."}
+ {g:"otros",n:"Ritmo sinusal normal",s:[R("sinus",{rr:.8})],lead:["DII"],ctx:"Chequeo preoperatorio, asintomático.",hint:"Cuenta ~4 cuadros grandes entre R; P antes de cada QRS; PR y QRS normales.",f:["FC ~75 lpm, regular","P antes de cada QRS, PR 0.16 s","QRS estrecho, ST isoeléctrico"],a:"Nada que tratar."},
+ {g:"taqui",n:"Taquicardia sinusal",s:[R("sinus",{rr:.5,pr:.14})],lead:["DII"],ctx:"Mujer con fiebre y deshidratación.",hint:"Hay P antes de cada QRS… ¿y la frecuencia?",f:["FC ~120 lpm, regular","P normal antes de cada QRS","QRS estrecho"],a:"Buscar y tratar la causa (fiebre, dolor, hipovolemia, TEP…)."},
+ {g:"bradi",n:"Bradicardia sinusal",s:[R("sinus",{rr:1.35})],lead:["DII"],ctx:"Deportista de 22 años, asintomático.",hint:"Todo es normal salvo la distancia entre R.",f:["FC ~45 lpm","P antes de cada QRS, PR normal","QRS estrecho"],a:"Asintomático: observar. Inestable: atropina 1 mg."},
+ {g:"isq",n:"IAMCEST (elevación del ST)",s:[SIN("stemi")],lead:["V2"],ctx:"Hombre 58 años, dolor opresivo retroesternal de 40 min con diaforesis.",hint:"Mira lo que pasa justo después del QRS: ¿está en la línea de base?",f:["ST↑ convexo («lomo de delfín»)","Criterio: ≥2 derivaciones contiguas (V2–V3 ≥2 mm en hombre ≥40)"],a:"Reperfusión: ICP ≤90 min (fibrinólisis si no hay ICP). AAS + P2Y12 + heparina."},
+ {g:"isq",n:"SCASEST: depresión del ST con T invertida",s:[SIN("stdep")],lead:["V5"],ctx:"Mujer 67 años, dolor torácico en reposo hace 2 h.",hint:"Mira el segmento entre QRS y T, y hacia dónde apunta la T.",f:["ST↓ horizontal","T invertida","Sin ST↑ persistente"],a:"ECG y troponina hs seriados; antiagregar + anticoagular; estratificar. Troponina ↑ = IAMSEST; normal = angina inestable."},
+ {g:"isq",n:"Onda T hiperaguda (IAMCEST muy temprano)",s:[SIN("hyperT")],lead:["V3"],ctx:"Hombre 50 años, dolor opresivo que empezó hace 15 minutos.",hint:"QRS bien. ¿La T es estrecha y picuda, o alta, ancha y simétrica?",f:["T alta, ancha y simétrica","ST casi isoeléctrico","Dolor de minutos de evolución"],a:"Repetir ECG en minutos; tratar como IAMCEST si evoluciona."},
+ {g:"isq",n:"IAMCEST inferior",s:[SIN("stemi"),SIN("stemi"),SIN("stemi"),SIN("stdep")],lead:["DII","DIII","aVF","aVL"],ctx:"Hombre 63 años, dolor epigástrico opresivo con náusea y diaforesis.",hint:"¿En qué grupo de derivaciones sube el ST, y dónde ves el espejo?",f:["ST↑ en DII, DIII y aVF (cara inferior)","ST↓ recíproco en aVL","Arteria habitual: coronaria derecha"],a:"Reperfusión inmediata. Pide V3R–V4R para buscar infarto de VD; vigila bradicardia y bloqueo AV."},
+ {g:"isq",n:"IAMCEST anterior",s:[SIN("stemi"),SIN("stemi"),SIN("stemi")],lead:["V2","V3","V4"],ctx:"Mujer 59 años con diabetes, disnea y opresión torácica de 1 h.",hint:"Las tres derivaciones son precordiales contiguas.",f:["ST↑ en V2–V4 (cara anterior)","Arteria habitual: descendente anterior","Mayor masa afectada: riesgo de choque"],a:"Reperfusión inmediata (ICP ≤90 min). Vigilar signos de choque cardiogénico."},
+ {g:"isq",n:"IAMCEST lateral",s:[SIN("stemi"),SIN("stemi"),SIN("stemi"),SIN("stdep")],lead:["DI","aVL","V6","DIII"],ctx:"Hombre 55 años, dolor torácico irradiado a brazo izquierdo.",hint:"DI, aVL y V5–V6 miran la misma pared.",f:["ST↑ en DI, aVL y V6 (cara lateral)","ST↓ recíproco en DIII","Arteria habitual: circunfleja o ramas de la DA"],a:"Reperfusión inmediata."},
+ {g:"isq",n:"Infarto de ventrículo derecho",s:[SIN("stemi"),SIN("stemi")],lead:["DIII","V4R"],ctx:"Hombre 62 años, IAM inferior; PA 85/55, yugulares ingurgitadas, pulmones limpios.",hint:"Fíjate en la derivación derecha.",f:["ST↑ inferior + ST↑ en V4R","Coronaria derecha proximal","Hipotensión con pulmones limpios"],a:"Reperfundir. Evitar nitratos y diuréticos; depende de precarga, cuidar volumen."},
+ {g:"isq",n:"Infarto posterior",s:[SIN("post"),SIN("post"),SIN("stemi")],lead:["V1","V2","V8"],ctx:"Mujer 70 años con dolor opresivo; en las precordiales derechas sólo ves ST↓.",hint:"El ST↓ de V1–V2 puede ser el espejo de otra pared. ¿Qué muestra V8?",f:["ST↓ con R alta en V1–V2 («en espejo»)","ST↑ en V7–V9 (aquí V8)","Circunfleja o coronaria derecha"],a:"Es un IAMCEST: reperfusión inmediata."},
+ {g:"isq",n:"Lesión de tronco / multivaso (ST↑ en aVR)",s:[SIN("avr"),SIN("stdep"),SIN("stdep"),SIN("stdep")],lead:["aVR","DII","V4","V5"],ctx:"Hombre 68 años, dolor intenso, PA 95/60. ST↓ en ≥6 derivaciones.",hint:"Hay una sola derivación con ST↑. ¿Cuál es?",f:["ST↑ en aVR","ST↓ difuso (≥6 derivaciones)","Patrón de alto riesgo"],a:"Isquemia de tronco o multivaso: alto riesgo, coronariografía urgente."},
+ {g:"isq",n:"Patrón de Wellens (SCASEST)",s:[SIN("wellens"),SIN("wellens")],lead:["V2","V3"],ctx:"Hombre 52 años, tuvo dolor anginoso ayer; ahora sin dolor.",hint:"No hay ST↑. Mira la T en V2–V3.",f:["T profundas, simétricas e invertidas en V1–V3","Paciente sin dolor en ese momento","Estenosis crítica de la DA"],a:"Es SCASEST de alto riesgo: no hacer prueba de esfuerzo; coronariografía."},
+ {g:"isq",n:"Bloqueo de rama izquierda (BRI) nuevo",s:[SIN("bri"),SIN("briV6")],lead:["V1","V6"],ctx:"Hombre 65 años con dolor opresivo; no tenía BRI en ECG previos.",hint:"QRS ancho: negativo en V1, ancho y mellado en V6.",f:["QRS ≥120 ms","QS profundo en V1","R ancha y mellada en V6 con T opuesta"],a:"BRI nuevo con sospecha de isquemia: tratar como IAMCEST (reperfusión)."},
+ {g:"isq",n:"Ondas Q patológicas (infarto antiguo)",s:[SIN("qwave"),SIN("qwave")],lead:["V2","V3"],ctx:"Hombre 71 años, infarto hace 2 años; hoy asintomático. (complemento)",hint:"El primer movimiento del QRS es hacia abajo y profundo.",f:["Q profunda y ancha","R pequeña","T invertida"],a:"Necrosis establecida (fase tardía del IAMCEST: T hiperaguda → ST↑ → Q → T invertida)."},
+ {g:"otros",n:"Hiperkalemia",s:[SIN("hyperK",{pr:.24})],lead:["V4"],ctx:"Paciente en hemodiálisis que faltó a 2 sesiones.",hint:"T estrecha en «tienda de campaña»; P casi plana, QRS algo ancho.",f:["T picudas, estrechas, simétricas","P aplanada y PR largo","QRS ensanchado"],a:"Calcio IV para estabilizar la membrana; después bajar K⁺ (complemento)."},
+ {g:"otros",n:"Hipokalemia (ondas U)",s:[SIN("hipoK")],lead:["V3"],ctx:"Mujer con vómito y diarrea de 4 días, calambres. (complemento)",hint:"Después de la T aparece otra onda.",f:["T aplanada","Onda U prominente","ST ligeramente descendido"],a:"Reponer K⁺ (y Mg²⁺); es causa de arritmias ventriculares."},
+ {g:"otros",n:"QT largo",s:[SIN("qt",{rr:1.0})],lead:["DII"],ctx:"Mujer que toma antiarrítmicos y macrólido; mareos. (complemento)",hint:"Mide desde el inicio del QRS al final de la T y compáralo con el RR.",f:["QT muy prolongado (T termina más allá de la mitad del RR)","Riesgo de torsades de pointes"],a:"Suspender fármacos que alargan el QT; corregir K⁺ y Mg²⁺."},
+ {g:"otros",n:"Extrasístoles ventriculares (trigeminismo)",s:[R("pvc",{rr:.8})],lead:["DII"],ctx:"Hombre 60 años con palpitaciones aisladas. (complemento)",hint:"Cada tercer latido llega antes, sin P y con otra forma.",f:["Latido prematuro, ancho, sin P","T opuesta al QRS","Pausa compensadora"],a:"Corregir electrolitos e isquemia; vigilar si hay cardiopatía."},
+ {g:"taqui",n:"Fibrilación auricular",s:[R("af")],lead:["DII"],ctx:"Mujer 74 años con palpitaciones.",hint:"¿Son iguales las distancias entre R? ¿Hay P?",f:["Irregularmente irregular","Sin ondas P; basal ondulante","QRS estrecho"],a:"Si inestable: cardioversión sincronizada (complemento)."},
+ {g:"taqui",n:"Flutter auricular",s:[R("flutter")],lead:["DII"],ctx:"Hombre 68 años con EPOC y palpitaciones. (complemento)",hint:"Mira la línea de base entre los QRS.",f:["Ondas F en «dientes de sierra» (~300/min)","Conducción 4:1, QRS regular y estrecho"],a:"Si inestable: cardioversión sincronizada; si estable, controlar frecuencia."},
+ {g:"taqui",n:"Taquicardia supraventricular paroxística (TSVP)",s:[R("nop",{rr:.31})],lead:["DII"],ctx:"Mujer 29 años, palpitaciones de inicio súbito; PA 118/76.",hint:"QRS estrecho, muy rápido y perfectamente regular. ¿Ves P?",f:["~190 lpm, regular","QRS estrecho","P no visibles"],a:"Estable: vagales → adenosina 6 mg → 12 mg. Inestable: cardioversión sincronizada."},
+ {g:"taqui",n:"Taquicardia ventricular monomórfica",s:[R("nop",{rr:.3,m:"vt"})],lead:["DII"],ctx:"Hombre 70 años con infarto antiguo, palpitaciones y mareo.",hint:"QRS ancho (>3 cuadros chicos), regular, rápido y todos iguales.",f:["~200 lpm, regular","QRS ancho (>120 ms), iguales","Sin P visibles"],a:"Sin pulso: desfibrilar. Inestable: cardioversión sincronizada. Estable: procainamida o amiodarona 150 mg."},
+ {g:"paro",n:"TV polimórfica (torsades de pointes)",s:[R("tdp")],lead:["DII"],ctx:"Mujer con QT largo por fármacos; síncope.",hint:"La amplitud crece y decrece como girando alrededor de la línea.",f:["QRS ancho que «gira» sobre la basal","Amplitud variable","Muy rápida"],a:"Sin pulso o sostenida: choque NO sincronizado. Magnesio IV; corregir K⁺ y QT."},
+ {g:"paro",n:"Fibrilación ventricular",s:[R("vf")],lead:["DII"],ctx:"Hombre se desploma en la sala de espera; sin pulso.",hint:"¿Puedes identificar P, QRS o T?",f:["Ondas caóticas sin P, QRS ni T","Sin pulso"],a:"Desfibrilar de inmediato (200 J bifásico) + RCP. Adrenalina tras 2.º choque, amiodarona 300 mg tras 3.º."},
+ {g:"paro",n:"Asistolia",s:[R("asys")],lead:["DII"],ctx:"Paciente sin pulso; confirmas en 2 derivaciones y revisas cables y ganancia.",hint:"Casi no hay nada que medir.",f:["Línea casi plana","Sin actividad ventricular ni pulso"],a:"NO desfibrilar. RCP + adrenalina 1 mg c/3–5 min; tratar causas."},
+ {g:"paro",n:"Actividad eléctrica sin pulso (AESP)",s:[R("sinus",{rr:1.25,m:"semi"})],lead:["DII"],ctx:"Paciente inconsciente, SIN pulso central, pero el monitor muestra complejos organizados.",hint:"El trazo parece «aceptable». ¿Qué te dice el caso sobre el pulso?",f:["Ritmo organizado lento","Sin pulso palpable"],a:"No desfibrilable: RCP + adrenalina 1 mg c/3–5 min; buscar H y T (hipovolemia, taponamiento, neumotórax, TEP…)."},
+ {g:"bradi",n:"BAV de 1.er grado",s:[R("sinus",{rr:.95,pr:.32})],lead:["DII"],ctx:"Hombre 60 años asintomático, toma β-bloqueador.",hint:"Todas las P conducen. Mide la distancia P–QRS.",f:["PR >0.20 s (aquí ~0.32 s), constante","Todas las P seguidas de QRS"],a:"Observar y corregir causa."},
+ {g:"bradi",n:"BAV 2.º grado Mobitz I (Wenckebach)",s:[R("w1")],lead:["DII"],ctx:"Mujer 66 años con IAM inferior, mareo leve.",hint:"Mide el PR latido por latido antes de la P que no conduce.",f:["PR que se alarga progresivamente","Una P sin QRS y el ciclo se reinicia","QRS estrecho"],a:"Asintomático: observar. Con compromiso: atropina 1 mg, marcapasos transcutáneo."},
+ {g:"bradi",n:"BAV 2.º grado Mobitz II",s:[R("w2")],lead:["DII"],ctx:"Hombre 72 años con síncopes.",hint:"¿Cambia el PR antes de la P bloqueada?",f:["PR fijo","P que de pronto no conduce","QRS algo ancho (infranodal)"],a:"Monitor + marcapasos. La atropina suele fallar."},
+ {g:"bradi",n:"BAV de 3.er grado (completo)",s:[R("av3")],lead:["DII"],ctx:"Mujer 80 años, FC 38, confusa, PA 80/50.",hint:"Marca las P con una regla. ¿Tienen relación con los QRS?",f:["P regulares (~95/min) y QRS lentos (~39/min)","Sin relación P–QRS","QRS ancho (escape ventricular)"],a:"Inestable: marcapasos (transvenoso temporal); atropina/epinefrina/dopamina de puente."},
+ {g:"bradi",n:"Bloqueo de rama derecha (BRD)",s:[SIN("brd"),SIN("brdI")],lead:["V1","DI"],ctx:"Hallazgo en un paciente con disnea. Recuerda que en TEP puede aparecer BRD.",hint:"QRS ancho con «orejas de conejo» en V1.",f:["QRS ≥120 ms","rSR' (M) en V1 con T invertida","S ancha en DI y V6"],a:"Buscar la causa (TEP, cardiopatía). BRD nuevo con sospecha de isquemia: tratar como IAMCEST."},
+ {g:"otros",n:"TEP: taquicardia sinusal con S1Q3T3",s:[SIN("leadI",{rr:.52,pr:.14}),SIN("leadIII",{rr:.52,pr:.14})],lead:["DI","DIII"],ctx:"Mujer 2 semanas posparto, disnea súbita y dolor pleurítico; SatO₂ 88%.",hint:"Compara DI y DIII: S profunda en una, Q y T negativa en la otra.",f:["Taquicardia sinusal (~115 lpm)","S profunda en DI","Q y T invertida en DIII"],a:"Probabilidad alta → AngioTAC y anticoagular. Inestable → alteplasa 100 mg en 2 h."}
 ];
 let ctxOn=store.get("cv_ctx",true);
 const ctxBtn=$("#ctxToggle");ctxBtn.setAttribute("aria-pressed",ctxOn);
 ctxBtn.onclick=()=>{ctxOn=!ctxOn;store.set("cv_ctx",ctxOn);ctxBtn.setAttribute("aria-pressed",ctxOn);const c=document.querySelector("#ecgArea .ctx");if(c)c.hidden=!ctxOn};
-let ecg={deck:shuffle(E.map((_,i)=>i)),i:0,ok:0,done:0,answered:false};
+const ecg={bag:[],last:null,cur:null,ok:0,total:0,streak:0,answered:false,group:"all"};
+const pool=()=>E.filter(x=>ecg.group==="all"||x.g===ecg.group);
+function pickECG(){
+  if(!ecg.bag.length){ecg.bag=shuffle(pool());if(ecg.bag.length>1&&ecg.bag[0]===ecg.last)ecg.bag.push(ecg.bag.shift())}
+  return ecg.bag.shift();
+}
+function scoreECG(){$("#ecgScore").innerHTML=`<div><strong>${ecg.ok}/${ecg.total}</strong><span>aciertos</span></div><div><strong>${ecg.streak}</strong><span>racha</span></div><div><strong>${E.length}</strong><span>tipos de ECG</span></div>`}
+function stripsHTML(c){const multi=c.s.length>1;return `<div class="strips${multi?" multi":""}">${c.s.map((s,k)=>`<div class="ecg-box">${stripSVG(s,{lead:c.lead[k],dur:multi?3:undefined})}</div>`).join("")}</div>`}
+function choices(c){
+  const same=shuffle(E.filter(x=>x!==c&&x.g===c.g)),other=shuffle(E.filter(x=>x!==c&&x.g!==c.g));
+  return shuffle([c,...same.slice(0,2),...other].slice(0,4));
+}
 function renderECG(){
-  if(ecg.i>=ecg.deck.length){$("#ecgArea").innerHTML=`<div class="card"><h2>Terminaste los ${E.length} trazos</h2><div class="score"><div><strong>${ecg.ok}/${ecg.done}</strong><span>identificados a la primera</span></div></div><div class="bar"><button class="btn" id="ecgRestart">Barajar de nuevo (trazos nuevos)</button></div></div>`;$("#ecgRestart").onclick=()=>{ecg={deck:shuffle(E.map((_,i)=>i)),i:0,ok:0,done:0};renderECG()};return}
-  const c=E[ecg.deck[ecg.i]];ecg.answered=false;ecg.tries=0;
-  $("#ecgBar").style.width=(ecg.i/ecg.deck.length*100)+"%";
-  $("#ecgScore").textContent=`Trazo ${ecg.i+1} de ${E.length} · ${ecg.ok} a la primera`;
+  const c=pickECG();ecg.cur=c;ecg.last=c;ecg.answered=false;scoreECG();
+  const opts=choices(c);
   $("#ecgArea").innerHTML=`<article class="card">
-    ${c.s.map((s,k)=>`<div class="ecg-box">${stripSVG(s,{lead:c.lead[k]})}</div>`).join("")}
+    ${stripsHTML(c)}
     <p class="ctx" ${ctxOn?"":"hidden"}>${esc(c.ctx)}</p>
-    <form class="answer-row" id="ecgForm" autocomplete="off"><input id="ecgInput" placeholder="¿Qué es? ej. «BAV completo»" aria-label="Tu diagnóstico"><button class="btn" type="submit">Revisar</button></form>
-    <div class="bar"><button class="btn quiet" id="ecgHint">Pista</button><button class="btn quiet" id="ecgOpts">Ver 4 opciones</button><button class="btn quiet" id="ecgGive">Me rindo</button><button class="btn quiet" id="ecgRedraw">Otro trazo igual</button></div>
+    <p class="q">¿Qué muestra este ECG?</p>
+    <div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${E.indexOf(o)}"><b>${"ABCD"[k]}</b><span>${esc(o.n)}</span></button>`).join("")}</div>
+    <div class="bar"><button class="btn quiet" id="ecgHint">Pista</button><button class="btn quiet" id="ecgRedraw">Redibujar trazo</button></div>
     <div id="ecgFb"></div></article>`;
-  $("#ecgInput").focus({preventScroll:true});
-  $("#ecgForm").onsubmit=e=>{e.preventDefault();const v=$("#ecgInput").value;if(!v.trim())return;check(c,v)};
-  $("#ecgHint").onclick=()=>{$("#ecgFb").innerHTML=`<p class="hint">${esc(c.hint)}</p>`};
-  $("#ecgGive").onclick=()=>reveal(c,false,"");
-  $("#ecgRedraw").onclick=()=>{const boxes=document.querySelectorAll("#ecgArea .ecg-box");c.s.forEach((s,k)=>boxes[k].innerHTML=stripSVG(s,{lead:c.lead[k]}))};
-  $("#ecgOpts").onclick=()=>{
-    const others=shuffle(E.filter(x=>x!==c)).slice(0,3),opts=shuffle([c,...others]);
-    $("#ecgFb").innerHTML=`<div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${E.indexOf(o)}"><b>${"ABCD"[k]}</b><span>${esc(o.n)}</span></button>`).join("")}</div>`;
-    document.querySelectorAll("#ecgFb .opt").forEach(b=>b.onclick=()=>{const right=E[+b.dataset.k]===c;b.classList.add(right?"right":"wrong");if(right){setTimeout(()=>reveal(c,true,"(con opciones)"),250)}else{ecg.tries++}});
-  };
+  $("#ecgHint").onclick=()=>{if(!ecg.answered)$("#ecgFb").innerHTML=`<p class="hint">${esc(c.hint)}</p>`};
+  $("#ecgRedraw").onclick=()=>{document.querySelector("#ecgArea .strips").outerHTML=stripsHTML(c)};
+  document.querySelectorAll("#ecgArea .opt").forEach(b=>b.onclick=()=>answerECG(c,b));
 }
-function check(c,v){
-  const s=norm(v);const right=c.ok.test(s)&&!(c.no&&c.no.test(s));
-  if(right)reveal(c,true,"");else{ecg.tries++;$("#ecgFb").innerHTML=`<p class="verdict no">No es «${esc(v)}». Intenta otra vez, pide una pista o mira las opciones.</p>`}
-}
-function reveal(c,right,note){
-  if(ecg.answered)return;ecg.answered=true;ecg.done++;if(right&&ecg.tries===0&&!note)ecg.ok++;
-  $("#ecgFb").innerHTML=`<div class="exp ${right?"ok":"no"}"><p class="verdict ${right?"ok":"no"}">${right?"Correcto":"Era:"} ${esc(c.n)} ${note}</p>
+function answerECG(c,b){
+  if(ecg.answered)return;ecg.answered=true;
+  const right=E[+b.dataset.k]===c;ecg.total++;if(right){ecg.ok++;ecg.streak++}else ecg.streak=0;
+  document.querySelectorAll("#ecgArea .opt").forEach(x=>{x.disabled=true;if(E[+x.dataset.k]===c)x.classList.add("right");else if(x===b)x.classList.add("wrong")});
+  scoreECG();
+  $("#ecgFb").innerHTML=`<div class="exp ${right?"ok":"no"}"><p class="verdict ${right?"ok":"no"}">${right?"Correcto:":"Incorrecto. Era:"} ${esc(c.n)}</p>
   <dl class="kv"><dt>Lo ves por</dt><dd><ul class="feat">${c.f.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></dd><dt>Haces</dt><dd>${esc(c.a)}</dd></dl></div>
-  <div class="bar"><button class="btn" id="ecgNext">Siguiente trazo</button></div>`;
-  document.querySelectorAll("#ecgArea input, #ecgArea form button").forEach(x=>x.disabled=true);
-  const n=$("#ecgNext");n.focus();n.onclick=()=>{ecg.i++;renderECG()};
+  <div class="bar"><button class="btn" id="ecgNext">Nuevo electro</button></div>`;
+  const n=$("#ecgNext");n.focus({preventScroll:true});n.onclick=renderECG;
 }
+$("#ecgNew").onclick=renderECG;
+$("#ecgGroup").onchange=e=>{ecg.group=e.target.value;ecg.bag=[];renderECG()};
 
 /* ================= REPASO ================= */
 const PLAN=[
@@ -638,7 +680,7 @@ document.getElementById("sub-nums").innerHTML=NUMS.map(n=>`<div class="num"><str
 
 /* ================= NAV ================= */
 const tabs=document.querySelectorAll("nav.tabs button");
-function showTab(k){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===k));["examen","ecg","repaso"].forEach(x=>$("#p-"+x).hidden=x!==k);store.set("cv_tab",k);if(k==="ecg"&&!document.querySelector("#ecgArea article, #ecgArea .card"))renderECG()}
+function showTab(k){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===k));["examen","ecg","repaso"].forEach(x=>$("#p-"+x).hidden=x!==k);store.set("cv_tab",k);if(k==="ecg"&&!ecg.cur)renderECG()}
 tabs.forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 const subs=document.querySelectorAll("#subnav .chip");
 function showSub(k){subs.forEach(b=>b.setAttribute("aria-pressed",b.dataset.sub===k));["plan","flash","algo","tabla","nums","trampas"].forEach(x=>$("#sub-"+x).hidden=x!==k);store.set("cv_sub",k)}
