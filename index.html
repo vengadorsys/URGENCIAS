@@ -141,7 +141,7 @@ ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
 
   <!-- ============ ECG ============ -->
   <section class="panel" id="p-ecg" hidden>
-    <p class="note">Mira el trazo y elige qué es. Pulsa <strong>Nuevo electro</strong> para que salga otro al azar. Velocidad 25 mm/s: cuadro chico 0.04 s, cuadro grande 0.20 s. Los trazos son esquemas dibujados por código, no registros reales; los marcados como «complemento» no venían en tus diapositivas.</p>
+    <p class="note">Mira el trazo y elige qué es. Pulsa <strong>Nuevo electro</strong> para que salga otro al azar. Velocidad 25 mm/s: cuadro chico 0.04 s, cuadro grande 0.20 s. Los trazos son esquemas dibujados por código, no registros reales. Sólo incluye ECG de los temas de tu guía.</p>
     <div class="bar">
       <button class="btn" id="ecgNew">Nuevo electro</button>
       <select id="ecgGroup" class="chip" aria-label="Tipo de ECG">
@@ -150,7 +150,7 @@ ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
         <option value="taqui">Taquiarritmias</option>
         <option value="bradi">Bradicardias y bloqueos</option>
         <option value="paro">Ritmos de paro</option>
-        <option value="otros">Otros (electrolitos, TEP…)</option>
+        <option value="otros">Otros (normal, hiperkalemia, TEP)</option>
       </select>
       <button class="chip" id="ctxToggle" aria-pressed="true">Mostrar caso clínico</button>
     </div>
@@ -449,10 +449,7 @@ function qrsT(t,q,m,rr){
     case "briV6": y+=G(t,q+.05,.025,.8)+G(t,q+.1,.025,.9)-.1*win(t,q+.15,q+.26,.015)+G(t,q+.34,.06,-.35);break;
     case "post": y+=G(t,q+.035,.014,.95)+G(t,q+.07,.012,-.15)-.2*win(t,q+.08,q+.22,.015)+G(t,q+.3,.05,.25);break;
     case "wellens": y+=G(t,q+.012,.008,-.06)+G(t,q+.04,.011,.9)+G(t,q+.065,.01,-.3)+G(t,q+.3,.06,-.6);break;
-    case "qwave": y+=G(t,q+.02,.015,-.6)+G(t,q+.055,.012,.35)+G(t,q+.08,.01,-.1)+G(t,q+tc,.05,-.3);break;
     case "avr": y+=G(t,q+.012,.008,.1)+G(t,q+.04,.012,-1.0)+.22*win(t,q+.07,q+.24,.015)+G(t,q+.3,.05,-.1);break;
-    case "qt": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)+.04*win(t,q+.08,q+.4,.02)+G(t,q+.5,.07,.28);break;
-    case "hipoK": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)-.08*win(t,q+.08,q+.2,.015)+G(t,q+.26,.05,.1)+G(t,q+.47,.05,.22);break;
     default: y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)+G(t,q+tc,.045,.3);
   }
   return y;
@@ -462,8 +459,7 @@ function beats(spec,dur){
   const reg=(rr,pr,jit)=>{let t=-1;while(t<dur+1){ev.push({p:pr==null?null:t-pr,q:t,m,rr});t+=rr+(jit?(Math.random()-.5)*jit:0)}};
   switch(spec.r){
     case "sinus": reg(spec.rr,spec.pr??.16,.02);break;
-    case "nop": case "flutter": reg(spec.rr||.8,null,0);break;
-    case "pvc":{let t=-1,k=0;while(t<dur+1){ev.push(k%3===2?{p:null,q:t-.3,m:"wide",rr:.8}:{p:t-.16,q:t,m,rr:.8});k++;t+=spec.rr}break}
+    case "nop": reg(spec.rr||.8,null,0);break;
     case "af":{let t=-1;while(t<dur+1){const rr=.38+Math.random()*.55;ev.push({p:null,q:t,m,rr});t+=rr}break}
     case "w1":{let t=-1.2,k=0;const prs=[.16,.26,.32];while(t<dur+1){if(k<3){ev.push({p:t,q:t+prs[k],m,rr:.8})}else ev.push({p:t,q:null});k=(k+1)%4;t+=.78}break}
     case "w2":{let t=-1.2,k=0;while(t<dur+1){ev.push(k<2?{p:t,q:t+.16,m:"semi",rr:.8}:{p:t,q:null});k=(k+1)%3;t+=.72}break}
@@ -484,7 +480,6 @@ function signal(spec,dur,fs){
       if(e.p!=null&&Math.abs(t-e.p)<.2)v+=G(t,e.p+.045,.022,pAmp);
       if(e.q!=null&&t>e.q-.1&&t<e.q+.6)v+=qrsT(t,e.q,e.m,e.rr);
     }
-    if(spec.r==="flutter"){const x=((t*5)%1+1)%1;v+=-.22*((x<.75?x/.75:(1-x)/.25)-.5)}
     if(spec.r==="af")v+=.045*(Math.sin(6.28*6.3*t)+.7*Math.sin(6.28*8.7*t+1)+.5*Math.sin(6.28*5.1*t+2));
     v+=(Math.random()-.5)*.012;
     y[i]=v}
@@ -524,13 +519,8 @@ const E=[
  {g:"isq",n:"Lesión de tronco / multivaso (ST↑ en aVR)",s:[SIN("avr"),SIN("stdep"),SIN("stdep"),SIN("stdep")],lead:["aVR","DII","V4","V5"],ctx:"Hombre 68 años, dolor intenso, PA 95/60. ST↓ en ≥6 derivaciones.",hint:"Hay una sola derivación con ST↑. ¿Cuál es?",f:["ST↑ en aVR","ST↓ difuso (≥6 derivaciones)","Patrón de alto riesgo"],a:"Isquemia de tronco o multivaso: alto riesgo, coronariografía urgente."},
  {g:"isq",n:"Patrón de Wellens (SCASEST)",s:[SIN("wellens"),SIN("wellens")],lead:["V2","V3"],ctx:"Hombre 52 años, tuvo dolor anginoso ayer; ahora sin dolor.",hint:"No hay ST↑. Mira la T en V2–V3.",f:["T profundas, simétricas e invertidas en V1–V3","Paciente sin dolor en ese momento","Estenosis crítica de la DA"],a:"Es SCASEST de alto riesgo: no hacer prueba de esfuerzo; coronariografía."},
  {g:"isq",n:"Bloqueo de rama izquierda (BRI) nuevo",s:[SIN("bri"),SIN("briV6")],lead:["V1","V6"],ctx:"Hombre 65 años con dolor opresivo; no tenía BRI en ECG previos.",hint:"QRS ancho: negativo en V1, ancho y mellado en V6.",f:["QRS ≥120 ms","QS profundo en V1","R ancha y mellada en V6 con T opuesta"],a:"BRI nuevo con sospecha de isquemia: tratar como IAMCEST (reperfusión)."},
- {g:"isq",n:"Ondas Q patológicas (infarto antiguo)",s:[SIN("qwave"),SIN("qwave")],lead:["V2","V3"],ctx:"Hombre 71 años, infarto hace 2 años; hoy asintomático. (complemento)",hint:"El primer movimiento del QRS es hacia abajo y profundo.",f:["Q profunda y ancha","R pequeña","T invertida"],a:"Necrosis establecida (fase tardía del IAMCEST: T hiperaguda → ST↑ → Q → T invertida)."},
  {g:"otros",n:"Hiperkalemia",s:[SIN("hyperK",{pr:.24})],lead:["V4"],ctx:"Paciente en hemodiálisis que faltó a 2 sesiones.",hint:"T estrecha en «tienda de campaña»; P casi plana, QRS algo ancho.",f:["T picudas, estrechas, simétricas","P aplanada y PR largo","QRS ensanchado"],a:"Calcio IV para estabilizar la membrana; después bajar K⁺ (complemento)."},
- {g:"otros",n:"Hipokalemia (ondas U)",s:[SIN("hipoK")],lead:["V3"],ctx:"Mujer con vómito y diarrea de 4 días, calambres. (complemento)",hint:"Después de la T aparece otra onda.",f:["T aplanada","Onda U prominente","ST ligeramente descendido"],a:"Reponer K⁺ (y Mg²⁺); es causa de arritmias ventriculares."},
- {g:"otros",n:"QT largo",s:[SIN("qt",{rr:1.0})],lead:["DII"],ctx:"Mujer que toma antiarrítmicos y macrólido; mareos. (complemento)",hint:"Mide desde el inicio del QRS al final de la T y compáralo con el RR.",f:["QT muy prolongado (T termina más allá de la mitad del RR)","Riesgo de torsades de pointes"],a:"Suspender fármacos que alargan el QT; corregir K⁺ y Mg²⁺."},
- {g:"otros",n:"Extrasístoles ventriculares (trigeminismo)",s:[R("pvc",{rr:.8})],lead:["DII"],ctx:"Hombre 60 años con palpitaciones aisladas. (complemento)",hint:"Cada tercer latido llega antes, sin P y con otra forma.",f:["Latido prematuro, ancho, sin P","T opuesta al QRS","Pausa compensadora"],a:"Corregir electrolitos e isquemia; vigilar si hay cardiopatía."},
  {g:"taqui",n:"Fibrilación auricular",s:[R("af")],lead:["DII"],ctx:"Mujer 74 años con palpitaciones.",hint:"¿Son iguales las distancias entre R? ¿Hay P?",f:["Irregularmente irregular","Sin ondas P; basal ondulante","QRS estrecho"],a:"Si inestable: cardioversión sincronizada (complemento)."},
- {g:"taqui",n:"Flutter auricular",s:[R("flutter")],lead:["DII"],ctx:"Hombre 68 años con EPOC y palpitaciones. (complemento)",hint:"Mira la línea de base entre los QRS.",f:["Ondas F en «dientes de sierra» (~300/min)","Conducción 4:1, QRS regular y estrecho"],a:"Si inestable: cardioversión sincronizada; si estable, controlar frecuencia."},
  {g:"taqui",n:"Taquicardia supraventricular paroxística (TSVP)",s:[R("nop",{rr:.31})],lead:["DII"],ctx:"Mujer 29 años, palpitaciones de inicio súbito; PA 118/76.",hint:"QRS estrecho, muy rápido y perfectamente regular. ¿Ves P?",f:["~190 lpm, regular","QRS estrecho","P no visibles"],a:"Estable: vagales → adenosina 6 mg → 12 mg. Inestable: cardioversión sincronizada."},
  {g:"taqui",n:"Taquicardia ventricular monomórfica",s:[R("nop",{rr:.3,m:"vt"})],lead:["DII"],ctx:"Hombre 70 años con infarto antiguo, palpitaciones y mareo.",hint:"QRS ancho (>3 cuadros chicos), regular, rápido y todos iguales.",f:["~200 lpm, regular","QRS ancho (>120 ms), iguales","Sin P visibles"],a:"Sin pulso: desfibrilar. Inestable: cardioversión sincronizada. Estable: procainamida o amiodarona 150 mg."},
  {g:"paro",n:"TV polimórfica (torsades de pointes)",s:[R("tdp")],lead:["DII"],ctx:"Mujer con QT largo por fármacos; síncope.",hint:"La amplitud crece y decrece como girando alrededor de la línea.",f:["QRS ancho que «gira» sobre la basal","Amplitud variable","Muy rápida"],a:"Sin pulso o sostenida: choque NO sincronizado. Magnesio IV; corregir K⁺ y QT."},
