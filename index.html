@@ -1,0 +1,651 @@
+<title>Urgencias CV · Repaso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500;62..125,700;62..125,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: una columna de estudio sobre "papel de ECG"; pestañas pegajosas arriba, tarjetas sólo para lo que se contesta. */
+:root{
+  --paper:#fbf8f7; --surface:#ffffff; --ink:#1c1f24; --muted:#5d636c; --line:#e7dcd9;
+  --grid-minor:#f3d9d6; --grid-major:#e6aaa4; --trace:#1c1f24;
+  --accent:#0d6b6f; --accent-ink:#ffffff; --accent-soft:#e1f0f0;
+  --ok:#1f7a3f; --ok-soft:#e3f3e8; --bad:#b3261e; --bad-soft:#fbe6e4; --warn:#8a5a00; --warn-soft:#fbf0d9;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#14171b; --surface:#1c2026; --ink:#e9ecef; --muted:#9aa3ad; --line:#2d333b;
+  --grid-minor:#2a2124; --grid-major:#4a2f33; --trace:#7ef0c4;
+  --accent:#4cc3c7; --accent-ink:#0b1416; --accent-soft:#183336;
+  --ok:#6fd38f; --ok-soft:#173222; --bad:#ff8a80; --bad-soft:#3a1b1a; --warn:#f2c46b; --warn-soft:#382c14;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14171b; --surface:#1c2026; --ink:#e9ecef; --muted:#9aa3ad; --line:#2d333b;
+  --grid-minor:#2a2124; --grid-major:#4a2f33; --trace:#7ef0c4;
+  --accent:#4cc3c7; --accent-ink:#0b1416; --accent-soft:#183336;
+  --ok:#6fd38f; --ok-soft:#173222; --bad:#ff8a80; --bad-soft:#3a1b1a; --warn:#f2c46b; --warn-soft:#382c14;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:20px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(1.7rem,5vw,2.4rem);font-weight:800;font-stretch:80%;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:700;font-stretch:85%}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header.top{display:grid;gap:6px;min-width:0;grid-template-columns:minmax(0,1fr);padding-block:8px 14px}
+header.top p{color:var(--muted);max-width:62ch}
+.strip-hero{height:46px;margin-top:6px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;gap:6px;padding-block:10px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{flex:1 0 auto;font:600 .95rem var(--f-body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button{font-family:var(--f-body)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.panel{display:grid;gap:18px;padding-top:20px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:600 .85rem var(--f-body);padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn{font:700 .95rem var(--f-body);padding:10px 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.quiet{background:transparent;color:var(--muted);border-color:var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;min-width:0}
+.meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tag{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
+.q{font-size:1.1rem;font-weight:600;line-height:1.4}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:1rem var(--f-body);padding:11px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.opt b{font-family:var(--f-mono);color:var(--muted);flex:0 0 auto}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.exp{border-left:3px solid var(--line);padding:4px 0 4px 12px;color:var(--ink)}
+.exp.ok{border-color:var(--ok)} .exp.no{border-color:var(--bad)}
+.verdict{font-weight:700}
+.verdict.ok{color:var(--ok)} .verdict.no{color:var(--bad)}
+.progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.score{display:flex;gap:18px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.score div{display:grid}
+.score strong{font:800 1.6rem var(--f-display);font-stretch:85%}
+.score span{font-size:.8rem;color:var(--muted)}
+.ecg-box{border-radius:8px;overflow:hidden;border:1px solid var(--grid-major);background:var(--paper)}
+.ecg-box svg{display:block;width:100%;height:auto}
+.lead{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);padding:4px 8px}
+.ctx{color:var(--muted);font-style:italic}
+.answer-row{display:flex;gap:8px;flex-wrap:wrap}
+.answer-row input{flex:1 1 220px;min-width:0;font:1rem var(--f-body);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.hint{background:var(--warn-soft);color:var(--warn);padding:8px 12px;border-radius:8px;font-size:.95rem}
+.feat{display:grid;gap:4px;margin:0;padding-left:18px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.kv dt{font-weight:700}.kv dd{margin:0}
+.flash{min-height:210px;place-content:center;text-align:center;cursor:pointer;user-select:none}
+.flash .front{font:700 1.25rem var(--f-display);font-stretch:90%}
+.flash .back{font-size:1.05rem;border-top:1px dashed var(--line);padding-top:12px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:0}
+.nums{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.num{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:2px}
+.num strong{font:800 1.3rem var(--f-display);font-stretch:85%;font-variant-numeric:tabular-nums}
+.num span{font-size:.9rem;color:var(--muted)}
+.algo{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.algo ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:0 0 auto}
+.check.done span{text-decoration:line-through;color:var(--muted)}
+.subnav{display:flex;gap:6px;flex-wrap:wrap}
+.note{font-size:.9rem;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+details summary{cursor:pointer;font-weight:700}
+details[open] summary{margin-bottom:8px}
+ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
+.fail-item{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:4px}
+@media (prefers-reduced-motion:reduce){.progress i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Urgencias médico-quirúrgicas · examen de mañana</span>
+    <h1>Urgencias cardiovasculares y ECG</h1>
+    <p>Choque cardiogénico, edema agudo de pulmón, síndromes coronarios, TEP y arritmias letales. Todo sale de tu guía; lo marcado como <em>complemento</em> no venía en tus diapositivas.</p>
+    <div class="strip-hero" id="hero"></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-examen" aria-selected="true" data-tab="examen">Examen</button>
+    <button role="tab" id="tab-ecg" aria-selected="false" data-tab="ecg">¿Qué ECG es?</button>
+    <button role="tab" id="tab-repaso" aria-selected="false" data-tab="repaso">Repaso exprés</button>
+  </nav>
+
+  <!-- ============ EXAMEN ============ -->
+  <section class="panel" id="p-examen">
+    <div class="bar" id="topicChips"></div>
+    <div class="bar">
+      <label for="nQ" class="note">Preguntas:</label>
+      <select id="nQ" class="chip"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="999">Todas</option></select>
+      <button class="btn" id="startExam">Nuevo examen</button>
+      <button class="btn ghost" id="startFails">Sólo mis fallos (<span id="failCount">0</span>)</button>
+    </div>
+    <div class="progress"><i id="examBar"></i></div>
+    <div id="examArea"></div>
+  </section>
+
+  <!-- ============ ECG ============ -->
+  <section class="panel" id="p-ecg" hidden>
+    <p class="note">Mira el trazo y escribe qué es (ej. «Mobitz II», «FV», «IAMCEST»). Se aceptan sinónimos. Velocidad 25 mm/s: cuadro chico 0.04 s, cuadro grande 0.20 s. Los trazos son esquemas dibujados por código, no registros reales.</p>
+    <div class="bar">
+      <button class="chip" id="ctxToggle" aria-pressed="true">Mostrar caso clínico</button>
+      <span class="note" id="ecgScore"></span>
+    </div>
+    <div class="progress"><i id="ecgBar"></i></div>
+    <div id="ecgArea"></div>
+  </section>
+
+  <!-- ============ REPASO ============ -->
+  <section class="panel" id="p-repaso" hidden>
+    <div class="subnav" id="subnav">
+      <button class="chip" aria-pressed="true" data-sub="plan">Plan para hoy</button>
+      <button class="chip" aria-pressed="false" data-sub="flash">Tarjetas rápidas</button>
+      <button class="chip" aria-pressed="false" data-sub="algo">Algoritmos</button>
+      <button class="chip" aria-pressed="false" data-sub="tabla">ECG → pienso → hago</button>
+      <button class="chip" aria-pressed="false" data-sub="nums">Números clave</button>
+      <button class="chip" aria-pressed="false" data-sub="trampas">Trampas de examen</button>
+    </div>
+
+    <div id="sub-plan" class="card">
+      <h2>Plan para esta noche</h2>
+      <p class="note">Bloques de 25–30 min con 5 min de descanso. Marca lo que vayas terminando; se guarda en este navegador.</p>
+      <div id="planList"></div>
+      <p class="note">Recordar activamente (contestar sin ver) fija mucho más que releer. Por eso cada bloque termina con preguntas. Dormir 6–7 h consolida lo estudiado: no sacrifiques el sueño por releer.</p>
+    </div>
+
+    <div id="sub-flash" hidden class="card">
+      <div class="meta"><span id="flashMeta"></span><span id="flashLeft"></span></div>
+      <div class="bar" id="flashTopics"></div>
+      <div class="card flash" id="flashCard" tabindex="0" role="button" aria-label="Voltear tarjeta"></div>
+      <div class="bar">
+        <button class="btn quiet" id="flashAgain">Otra vez</button>
+        <button class="btn" id="flashKnew">Me la sabía</button>
+        <button class="btn ghost" id="flashReset">Reiniciar mazo</button>
+      </div>
+      <p class="note">Toca la tarjeta para ver la respuesta. «Otra vez» la regresa al mazo unas tarjetas después.</p>
+    </div>
+
+    <div id="sub-algo" hidden>
+      <div class="algo">
+        <div class="card"><span class="tag">Taquicardia con pulso</span>
+          <ol>
+            <li>¿Inestable? (hipotensión, ↓ conciencia, choque, dolor isquémico, IC aguda) → <strong>cardioversión sincronizada</strong>.</li>
+            <li>Estable + <strong>QRS ancho</strong> regular (TV): procainamida o amiodarona 150 mg IV en 10 min.</li>
+            <li>Estable + <strong>QRS estrecho</strong> (TSVP): Valsalva modificado → adenosina <strong>6 mg → 12 mg</strong> bolo rápido → β-bloq./verapamilo/diltiazem o amiodarona.</li>
+          </ol></div>
+        <div class="card"><span class="tag">Paro sin pulso</span>
+          <ol>
+            <li>RCP de alta calidad: 100–120/min, ≥5 cm, monitor/desfibrilador.</li>
+            <li><strong>FV / TV sin pulso</strong>: descarga 200 J bifásico (360 J monofásico), RCP 2 min y repetir.</li>
+            <li>Tras 2.º choque: adrenalina 1 mg c/3–5 min. Tras 3.er choque: <strong>amiodarona 300 mg</strong>, luego 150 mg.</li>
+            <li><strong>Asistolia / AESP</strong>: NO se desfibrila; RCP + adrenalina 1 mg c/3–5 min.</li>
+            <li>Busca las H y T: hipovolemia, hipoxia, acidosis, K⁺/Mg²⁺, hipotermia, neumotórax, taponamiento, tóxicos, trombosis (IAM/TEP).</li>
+          </ol></div>
+        <div class="card"><span class="tag">Bradicardia / BAV</span>
+          <ol>
+            <li>Estable: observar y corregir causa (BAV 1.º, Mobitz I).</li>
+            <li>Inestable: atropina 1 mg IV c/3–5 min (máx. 5 mg según tus diapositivas).</li>
+            <li>Marcapasos transcutáneo; epinefrina 2–10 µg/min o dopamina 5–20 µg/kg/min de puente.</li>
+            <li>Mobitz II y BAV completo: <strong>marcapasos</strong> (la atropina suele fallar si el bloqueo es infranodal).</li>
+          </ol></div>
+        <div class="card"><span class="tag">TEP</span>
+          <ol>
+            <li>Probabilidad clínica (Wells, Ginebra, PERC).</li>
+            <li>Baja/intermedia → <strong>dímero D</strong>; negativo (ajustado por edad) la descarta.</li>
+            <li>Alta o dímero D positivo → <strong>AngioTAC</strong> (V/Q si embarazo o IR).</li>
+            <li>Inestable (alto riesgo) → <strong>alteplasa 100 mg en 2 h</strong> o embolectomía. Estable → anticoagular.</li>
+          </ol></div>
+        <div class="card"><span class="tag">SCA</span>
+          <ol>
+            <li><strong>ECG de 12 derivaciones en ≤10 min</strong>.</li>
+            <li>ST↑ (o BRI/BRD nuevo con isquemia) → reperfusión: ICP ≤90 min (≤120 si transferido); fibrinólisis si no hay ICP.</li>
+            <li>Sin ST↑ → ECG y troponina hs seriados, estratificar riesgo.</li>
+            <li>AAS + P2Y12 (ticagrelor 180 / clopidogrel 300) + heparina; O₂ sólo si SatO₂ &lt;90%.</li>
+          </ol></div>
+        <div class="card"><span class="tag">Choque cardiogénico / EAP</span>
+          <ol>
+            <li>Choque: PAS &lt;90 ≥30 min + hipoperfusión + congestión. Meta PAM &gt;65.</li>
+            <li><strong>Norepinefrina</strong> (vasopresor) + <strong>dobutamina</strong> (inotrópico); evitar dopamina.</li>
+            <li>Tratamiento definitivo: <strong>revascularizar el vaso culpable</strong>.</li>
+            <li>EAP: <strong>CPAP/BiPAP + furosemida IV + nitroglicerina IV</strong> (si hay HTA) y tratar la causa.</li>
+          </ol></div>
+      </div>
+    </div>
+
+    <div id="sub-tabla" hidden class="tablewrap">
+      <table>
+        <thead><tr><th>Veo en el ECG</th><th>Pienso en</th><th>Primera acción</th></tr></thead>
+        <tbody id="ecgTable"></tbody>
+      </table>
+    </div>
+
+    <div id="sub-nums" hidden class="nums"></div>
+
+    <div id="sub-trampas" hidden class="card">
+      <h2>Trampas que suelen preguntar</h2>
+      <ul class="tight">
+        <li><strong>Desfibrilar la asistolia</strong>: nunca. Asistolia y AESP = RCP + adrenalina.</li>
+        <li><strong>Líquidos a un paciente congestionado</strong>: cristaloides sólo si hay hipovolemia sin congestión (elevación pasiva de piernas).</li>
+        <li><strong>Esperar la troponina para reperfundir un IAMCEST</strong>: el diagnóstico es por ECG.</li>
+        <li><strong>Dímero D con probabilidad alta de TEP</strong>: no sirve; vas directo a AngioTAC.</li>
+        <li><strong>Cardioversión vs desfibrilación</strong>: sincronizada = con pulso; desfibrilación = sin pulso (FV/TV sin pulso). Torsades sostenida = choque no sincronizado.</li>
+        <li><strong>Un ECG normal no descarta SCA</strong>: repite ECG y troponina.</li>
+        <li><strong>Infarto de VD</strong> (inferior + V4R, hipotensión, yugulares llenas, pulmones limpios): evitar nitratos y diuréticos; depende de precarga.</li>
+        <li><strong>TEP masiva y taponamiento</strong> producen choque <em>obstructivo</em>, aunque tus diapositivas los listen como causas de choque cardiogénico.</li>
+        <li><strong>Oxígeno en SCA</strong>: sólo si SatO₂ &lt;90%.</li>
+        <li><strong>Mobitz II / BAV completo</strong>: no te quedes en la atropina; marcapasos.</li>
+      </ul>
+      <details>
+        <summary>Puntos donde tus diapositivas difieren de la práctica habitual</summary>
+        <ul class="tight">
+          <li>Metoprolol 25–50 mg «IV»: esa es dosis oral; la IV usual es 5 mg y no es rutina si hay IC o riesgo de choque.</li>
+          <li>Heparina en IAMCEST: diapositiva 100 U/kg; con ICP se usa 70–100 U/kg.</li>
+          <li>Morfina: hoy se reserva para dolor refractario.</li>
+          <li>Compresiones: diapositiva «100/min»; rango correcto 100–120/min.</li>
+          <li>Rivaroxabán 15 mg c/12 h (21 días) y apixabán 10 mg c/12 h (7 días) son dosis de ataque; luego se reducen.</li>
+        </ul>
+        <p class="note">Si en el examen preguntan una dosis, contesta con la de tus diapositivas a menos que tu profesor haya dicho otra cosa.</p>
+      </details>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();
+
+/* ================= PREGUNTAS ================= */
+const T={ecg:"Bases ECG",choque:"Choque cardiogénico",eap:"Edema agudo de pulmón",sca:"Síndromes coronarios",tep:"TEP",arr:"Arritmias"};
+const Q=[
+// Bases ECG
+["ecg","A 25 mm/s, ¿cuánto dura un cuadro chico del papel de ECG?",["0.04 s","0.20 s","0.10 s","0.02 s"],0,"Cuadro chico = 0.04 s; cuadro grande (5 chicos) = 0.20 s."],
+["ecg","Ritmo regular con 3 cuadros grandes entre dos R. ¿Frecuencia?",["100 lpm","75 lpm","150 lpm","60 lpm"],0,"FC = 300 ÷ cuadros grandes = 300 ÷ 3 = 100 lpm."],
+["ecg","¿Cuál es el intervalo PR normal?",["0.12–0.20 s","0.06–0.10 s","0.20–0.30 s","<0.12 s"],0,"El PR (tránsito por el nodo AV) normal es 0.12–0.20 s. Mayor de 0.20 s constante = BAV de 1.er grado."],
+["ecg","Un QRS se considera estrecho cuando mide…",["<0.12 s (120 ms)","<0.20 s","<0.04 s",">0.12 s"],0,"QRS normal <120 ms porque el impulso viaja rápido por His-Purkinje. Ancho = origen ventricular o trastorno de conducción."],
+["ecg","ST↑ en II, III y aVF. ¿Qué pared y qué arteria suele estar afectada?",["Inferior; coronaria derecha","Anterior; descendente anterior","Lateral; circunfleja","Posterior; descendente anterior"],0,"II, III, aVF = cara inferior, casi siempre coronaria derecha. Frecuente bloqueo AV y bradicardia."],
+["ecg","¿Qué derivaciones ven la cara lateral?",["I, aVL, V5–V6","V1–V2","II, III, aVF","V3R–V4R"],0,"Lateral = I, aVL, V5–V6 (circunfleja o ramas de la DA)."],
+["ecg","¿Qué derivaciones pides para buscar infarto de ventrículo derecho?",["V3R–V4R","V7–V9","V1–V2","aVR"],0,"V3R–V4R. Piénsalo en IAM inferior con hipotensión."],
+["ecg","En un infarto posterior, ¿qué ves en V1–V3?",["ST↓ «en espejo»","ST↑ convexo","Ondas Q profundas","Ondas T picudas"],0,"La cara posterior se ve en espejo en V1–V3 (ST↓). Se confirma con V7–V9."],
+["ecg","¿Qué representa la onda P?",["Activación (despolarización) auricular","Repolarización ventricular","Activación ventricular","Paso por el nodo AV"],0,"P = aurículas; QRS = ventrículos; T = repolarización ventricular; PR = paso por el nodo AV."],
+// Choque
+["choque","¿Cuál es el criterio clínico de presión en el choque cardiogénico?",["PAS <90 mmHg durante ≥30 min","PAS <100 mmHg en una toma","PAM <80 mmHg","PAS <70 mmHg durante 5 min"],0,"Criterios clínicos: PAS <90 mmHg ≥30 min, diuresis <30 mL/h y extremidades frías."],
+["choque","Criterios hemodinámicos del choque cardiogénico:",["IC ≤2.2 L/min/m² y PCP >15 mmHg","IC >4 y PCP <8","IC ≤2.2 y PCP <10","IC normal y PVC alta"],0,"Índice cardíaco ≤2.2 L/min/m² y presión de enclavamiento capilar pulmonar >15 mmHg (bomba que no vacía + congestión)."],
+["choque","¿Causa más común de choque cardiogénico?",["IAM / isquemia miocárdica aguda","Miocarditis","Taponamiento","Toxicidad por fármacos"],0,"El IAM es la causa principal. Las complicaciones mecánicas del IAM (IM aguda, CIV, rotura de papilar) también lo causan."],
+["choque","Vasopresor de elección en choque cardiogénico:",["Norepinefrina","Dopamina","Vasopresina","Fenilefrina"],0,"Norepinefrina (α1) sube la PAM. Se evita dopamina porque causa más arritmias."],
+["choque","Inotrópico de elección en choque cardiogénico:",["Dobutamina","Norepinefrina","Milrinona","Digoxina"],0,"Dobutamina (β1) aumenta la contractilidad y el gasto. Efectos adversos: hipotensión, taquicardia, arritmias."],
+["choque","¿Cuándo se dan cristaloides en choque cardiogénico?",["Sólo si hay hipovolemia sin congestión pulmonar, confirmando con elevación pasiva de piernas","Siempre, 2 L en bolo","Nunca","Sólo si hay crepitantes"],0,"Líquidos sólo sin congestión y con respuesta a elevación pasiva de piernas. Si hay congestión: diurético de asa IV."],
+["choque","En la clasificación SCAI, la etapa B (inicio/pre-shock) es…",["Hipotensión sin hipoperfusión","Paro cardíaco","Choque clásico con hipoperfusión","Paciente sin síntomas en riesgo"],0,"A en riesgo, B pre-shock (hipotensión SIN hipoperfusión), C choque clásico, D deterioro, E extremo con paro."],
+["choque","Objetivo de PAM en choque cardiogénico:",[">65 mmHg",">90 mmHg",">50 mmHg",">100 mmHg"],0,"Restaurar perfusión con PAM >65 mmHg, tratar la causa y evitar lesión de órganos."],
+["choque","Hombre de 66 años con IAMCEST anterior, PAS 82, extremidades frías, lactato 4 y crepitantes bilaterales. ¿Qué cambia más su pronóstico?",["Revascularización urgente del vaso culpable + norepinefrina","Bolo de 2 L de cristaloides","Sólo furosemida IV","Morfina y observación"],0,"Es choque cardiogénico por IAMCEST: abrir la arteria culpable cambia el pronóstico. Los cristaloides empeoran la congestión."],
+["choque","¿Qué estudio confirma disfunción cardíaca y descarta taponamiento en el choque?",["Ecocardiograma / POCUS","Radiografía de tórax","Dímero D","Gasometría venosa"],0,"El eco/POCUS confirma la falla de bomba y descarta taponamiento o valvulopatía aguda."],
+// EAP
+["eap","Esputo típico del edema agudo de pulmón:",["Espumoso color salmón (rosado)","Purulento verde","Hemoptisis franca","Mucoso blanco espeso"],0,"Esputo espumoso asalmonado + disnea intensa, ortopnea, diaforesis, ansiedad."],
+["eap","Mecanismo del EAP cardiogénico:",["↑ presión hidrostática capilar","↑ permeabilidad alvéolo-capilar","↓ presión oncótica por desnutrición","Obstrucción linfática"],0,"El VI no vacía y la presión se transmite hacia atrás al pulmón. El no cardiogénico es por ↑ permeabilidad (sepsis, SDRA)."],
+["eap","¿Cuál es una causa de EAP NO cardiogénico?",["SDRA / sepsis","Crisis hipertensiva","FA con respuesta rápida","Valvulopatía descompensada"],0,"No cardiogénico: sepsis, SDRA, inhalación de tóxicos, aspiración, neurogénico, de altura."],
+["eap","Hallazgo radiológico clásico del EAP:",["Infiltrado alveolar bilateral «en alas de mariposa» y líneas B de Kerley","Joroba de Hampton","Signo de Westermark","Neumotórax"],0,"Alas de mariposa, Kerley B, cardiomegalia (índice >0.5), derrame pleural. Hampton y Westermark son de TEP."],
+["eap","¿Qué biomarcador apoya el origen cardiogénico de la disnea?",["BNP / NT-proBNP","Dímero D","Procalcitonina","Lactato"],0,"BNP/NT-proBNP elevado apoya origen cardiogénico."],
+["eap","Hipertenso con EAP cardiogénico y SatO₂ 82%. Combinación inicial:",["CPAP/BiPAP + furosemida IV + nitroglicerina IV","Cristaloides + norepinefrina","Sólo puntas nasales","Alteplasa"],0,"CPAP/BiPAP oxigena, furosemida baja volumen, nitroglicerina baja pre y poscarga (sobre todo con HTA)."],
+["eap","EAP con PAS de 80 mmHg. ¿Qué evitas?",["Nitroglicerina (nitratos)","Oxígeno","Ecocardiograma","Monitorización"],0,"Con hipotensión no se dan nitratos. Hipotensión + congestión ya es choque cardiogénico (complemento)."],
+["eap","¿Por qué la nitroglicerina ayuda en el EAP?",["Reduce precarga y poscarga","Aumenta la contractilidad","Es diurético","Disuelve trombos"],0,"Vasodilatador venoso y arterial: baja precarga y poscarga."],
+// SCA
+["sca","Hombre de 55 años. ¿Umbral mínimo de ST↑ en V2–V3 para IAMCEST?",["2 mm","1 mm","1.5 mm","2.5 mm"],0,"Hombres ≥40 años ≥2 mm; hombres <40 años ≥2.5 mm; mujeres ≥1.5 mm; otras derivaciones ≥1 mm."],
+["sca","Mujer de 50 años: umbral de ST↑ en V2–V3:",["≥1.5 mm","≥2 mm","≥2.5 mm","≥1 mm"],0,"Mujeres ≥1.5 mm en V2–V3."],
+["sca","¿Qué dato hace tratar un SCA como IAMCEST aunque no haya ST↑ clásico?",["BRI o BRD nuevo con sospecha de isquemia","Troponina negativa","Dolor pleurítico","FC 60 lpm"],0,"Bloqueo de rama nuevo con sospecha de isquemia = tratar como IAMCEST."],
+["sca","¿En cuánto tiempo debe tomarse el ECG a un paciente con dolor torácico?",["≤10 minutos","≤30 minutos","≤1 hora","Al tener la troponina"],0,"ECG de 12 derivaciones en los primeros 10 minutos y monitoreo continuo."],
+["sca","¿Qué diferencia la angina inestable del IAMSEST?",["La troponina (normal en angina inestable, elevada en IAMSEST)","El ECG (ST↑ en angina)","La edad","El tipo de dolor"],0,"Ambos pueden tener ST↓/T invertida o ECG normal; la troponina elevada indica necrosis = IAMSEST."],
+["sca","¿Cuándo se da oxígeno en el SCA?",["Sólo si SatO₂ <90%","Siempre","Sólo si hay dolor","Nunca"],0,"Oxígeno sólo con SatO₂ <90%."],
+["sca","Tiempo objetivo para ICP primaria en IAMCEST:",["≤90 min (≤120 min si es transferido)","≤6 horas","≤24 horas","≤30 min sin excepción"],0,"ICP primaria ≤90 min; ≤120 min en transferidos. Si no hay ICP disponible: fibrinólisis."],
+["sca","Troponina hs indica lesión miocárdica si está por encima de…",["Percentil 99 del límite superior","Percentil 50","2 veces el valor de referencia","Percentil 75"],0,"Por arriba del percentil 99, y se pide seriada."],
+["sca","¿Qué marcador sube primero (1–2 h)?",["Mioglobina","Troponina T","CK-MB","BNP"],0,"Mioglobina sube más rápido pero es poco específica. Troponina T: sube 4–6 h, pico 12–24 h, persiste 7–10 días."],
+["sca","¿Cuánto tiempo permanece elevada la troponina T?",["7–10 días","24 horas","48 horas","1 mes"],0,"Por eso sirve para infartos de días previos."],
+["sca","ST↓ ≥1 mm en ≥6 derivaciones + ST↑ en aVR/V1 sugiere…",["Lesión de tronco izquierdo o multivaso","Pericarditis","TEP","Repolarización precoz"],0,"Patrón de alto riesgo: isquemia multivaso o de tronco."],
+["sca","Secuencia típica de evolución del IAMCEST en el ECG:",["T hiperaguda → ST↑ → onda Q → T invertida","ST↓ → T alta → Q","Q → ST↑ → T hiperaguda","T invertida → ST↑ → T hiperaguda"],0,"Lo primero son T altas y anchas (hiperagudas), luego ST↑, aparecen Q y al final T invertida (complemento)."],
+["sca","Dosis de carga de ticagrelor en SCA:",["180 mg","600 mg","90 mg","300 mg"],0,"Ticagrelor 180 mg o clopidogrel 300 mg."],
+["sca","Dosis de aspirina VO en IAMCEST según tus diapositivas:",["150–300 mg","75–100 mg","500–1000 mg","20 mg"],0,"150–300 mg en IAMCEST e IAMSEST (162–325 mg en angina inestable). 75–100 mg/día es la de mantenimiento."],
+["sca","Nitroglicerina SL en SCA:",["0.4 mg c/5 min, hasta 3 dosis","5 mg una vez","0.4 mg c/1 h","No se usa"],0,"0.4 mg SL cada 5 minutos, 3 dosis."],
+["sca","¿Qué característica del dolor BAJA la probabilidad de origen coronario?",["Punzante, pleurítico, cambia con la respiración o palpación","Opresivo retroesternal","Irradia a mandíbula","Aparece con esfuerzo"],0,"El dolor punzante o pleurítico o reproducible a la palpación hace menos probable el SCA."],
+["sca","ST↑ en II, III, aVF y V4R; PA 85/55, yugulares ingurgitadas, pulmones limpios. ¿Qué evitas?",["Nitratos y diuréticos","Aspirina","Reperfusión","Monitor"],0,"Infarto de VD: depende de precarga; nitratos y diuréticos pueden hundir la presión. Cuida el volumen y reperfunde."],
+["sca","Fisiopatología del SCA:",["Rotura o erosión de placa inestable → trombo","Espasmo esofágico","Embolia de colesterol venosa","Disección aórtica siempre"],0,"Rotura/erosión de placa → activación de plaquetas y coagulación → trombo → isquemia → necrosis."],
+["sca","Prevención en síndrome coronario crónico: dosis de aspirina",["75–100 mg/día","300 mg/día","500 mg c/8 h","No se usa"],0,"Aspirina 75–100 mg/día (o clopidogrel 75 mg) + estatina de alta intensidad (atorvastatina 40–80, rosuvastatina 20–40)."],
+["sca","Patrón de Wellens (V1–V3) se asocia a…",["SCASEST (estenosis crítica de la DA)","Hiperkalemia","TEP","Pericarditis"],0,"Wellens es un hallazgo de SCASEST en V1–V3 que indica lesión crítica de la descendente anterior."],
+// TEP
+["tep","¿De dónde proviene ~95% de las TEP?",["TVP de miembros inferiores","Aurícula izquierda","Venas de miembros superiores","Válvula mitral"],0,"Poplítea, femoral, ilíaca → cava inferior → AD → VD → arterias pulmonares."],
+["tep","Mujer de 34 años con anticonceptivos, disnea y probabilidad clínica BAJA de TEP. Siguiente paso:",["Dímero D","AngioTAC directo","Angiografía pulmonar","Alteplasa empírica"],0,"Probabilidad baja/intermedia → dímero D. Si es negativo (ajustado por edad), se descarta."],
+["tep","TEP con PAS de 70 mmHg sostenida. Tratamiento:",["Trombólisis (alteplasa 100 mg en 2 h) y soporte","Alta con rivaroxabán","Sólo aspirina","Furosemida"],0,"TEP de alto riesgo (inestable) → trombólisis o embolectomía."],
+["tep","Estudio de elección para confirmar TEP:",["AngioTAC pulmonar","Radiografía de tórax","Ecocardiograma","Dímero D"],0,"AngioTAC: defecto de llenado, VD/VI >1, émbolo en silla de montar."],
+["tep","Embarazada con sospecha de TEP o con insuficiencia renal: estudio alternativo",["Gammagrafía V/Q","Resonancia de rodilla","PET","Coronariografía"],0,"Gammagrafía ventilación/perfusión cuando no se puede hacer TAC."],
+["tep","Hallazgo más frecuente en el ECG de TEP:",["Taquicardia sinusal","S1Q3T3","Bloqueo de rama izquierda","Ondas Q en V1–V3"],0,"Lo más frecuente es la taquicardia sinusal. S1Q3T3 es clásico pero poco sensible."],
+["tep","TEP de riesgo intermedio (submasiva) es…",["Estable con disfunción de VD y/o troponina/BNP elevados","Inestable con choque","Estable sin daño de VD","Asintomática"],0,"Alto riesgo = inestable; intermedio = estable con VD o biomarcadores alterados; bajo = sin nada."],
+["tep","Gasometría típica en TEP:",["Hipoxemia, hipocapnia y alcalosis respiratoria","Hipercapnia y acidosis respiratoria","Normal siempre","Acidosis metabólica pura"],0,"Hiperventilación → hipocapnia y alcalosis respiratoria; gradiente A-a elevado."],
+["tep","Signo de McConnell en el ecocardiograma:",["Hipocinesia de pared libre del VD con ápex conservado (TEP)","Derrame pericárdico","Insuficiencia mitral","Hipertrofia de VI"],0,"Signo de McConnell: disfunción de VD en TEP."],
+["tep","Joroba de Hampton y signo de Westermark se ven en…",["Radiografía de tórax en TEP","ECG de TEP","Ecocardiograma de EAP","TAC de choque"],0,"La Rx en TEP suele ser normal; estos signos son clásicos pero raros. Sirve para descartar neumonía o neumotórax."],
+["tep","¿Qué tipo de choque produce una TEP masiva?",["Obstructivo","Cardiogénico","Distributivo","Hipovolémico"],0,"Obstrucción del lecho pulmonar → VD dilatado → ↓ gasto: choque obstructivo."],
+["tep","Dosis de alteplasa en TEP de alto riesgo:",["100 mg IV en 2 h","10 mg en bolo","1 mg/kg c/12 h","50 mg VO"],0,"Alteplasa 100 mg en 2 horas."],
+["tep","Dosis de enoxaparina en TEP:",["1 mg/kg SC cada 12 h","40 mg SC cada 24 h","80 UI/kg IV","5 mg/kg cada 8 h"],0,"Enoxaparina 1 mg/kg c/12 h. HNF: bolo 80 UI/kg. Fondaparinux 5/7.5/10 mg según peso."],
+["tep","En Wells para TEP, «signos clínicos de TVP» vale…",["3 puntos","1 punto","1.5 puntos","0.5 puntos"],0,"Signos de TVP 3, TEP como diagnóstico más probable 3, FC >100 1.5, inmovilización/cirugía 1.5, TEP/TVP previa 1.5, hemoptisis 1, cáncer 1 (complemento)."],
+["tep","¿Por qué hay hipoxemia en la TEP?",["Espacio muerto: zonas ventiladas no perfundidas (desequilibrio V/Q)","Hipoventilación","Edema alveolar","Anemia"],0,"Obstrucción vascular → zonas ventiladas no perfundidas → desequilibrio V/Q → hipoxemia."],
+// Arritmias
+["arr","PR que se alarga progresivamente hasta que una P no conduce, QRS estrecho:",["Mobitz I (Wenckebach)","BAV 1.er grado","Mobitz II","BAV completo"],0,"PR progresivo + P bloqueada = Wenckebach. Mobitz II tiene PR fijo."],
+["arr","Paciente sin pulso con línea plana confirmada en 2 derivaciones:",["RCP + epinefrina 1 mg c/3–5 min y tratar causas","Desfibrilar a 200 J","Cardioversión sincronizada","Atropina sola"],0,"Asistolia no se desfibrila."],
+["arr","Taquicardia de QRS ancho regular, PA 78/50 y confusión:",["Cardioversión sincronizada","Procainamida","Adenosina","Observación"],0,"Inestable con pulso = cardioversión sincronizada. Los fármacos son para el estable."],
+["arr","Taquicardia regular de QRS estrecho a 190 lpm, estable, no cede con Valsalva:",["Adenosina 6 mg IV rápida, luego 12 mg","Desfibrilación","Atropina","Marcapasos"],0,"TSVP estable: vagales → adenosina 6 → 12 mg."],
+["arr","Energía de desfibrilación en FV con desfibrilador bifásico:",["200 J","50 J","100 J sincronizado","360 J sincronizado"],0,"200 J bifásico / 360 J monofásico, no sincronizado."],
+["arr","En FV refractaria, ¿cuándo y cuánto de amiodarona?",["Tras el 3.er choque, 300 mg IV (luego 150 mg)","Antes del 1.er choque, 150 mg","Tras el 1.er choque, 600 mg","Nunca"],0,"Adrenalina tras el 2.º choque; amiodarona 300 mg tras el 3.º."],
+["arr","Torsades de pointes: tratamiento farmacológico específico (complemento)",["Sulfato de magnesio IV","Adenosina","Verapamilo","Digoxina"],0,"Magnesio IV y corregir K⁺ y fármacos que alargan el QT. Si es sostenida sin pulso: choque no sincronizado."],
+["arr","TV monomórfica estable con pulso:",["Procainamida o amiodarona 150 mg IV en 10 min","Cardioversión inmediata","Desfibrilación","Atropina"],0,"Estable → antiarrítmico IV. Inestable → cardioversión sincronizada."],
+["arr","Criterio para suspender la procainamida:",["QRS se ensancha >50%","FC <100","PA >140","Tras 1 minuto"],0,"Hasta supresión, hipotensión, QRS ensanchado >50% o máximo 17 mg/kg."],
+["arr","Compresiones en RCP de alta calidad:",["100–120/min y ≥5 cm","60–80/min y 3 cm","140/min y 2 cm","80/min y ≥7 cm"],0,"100–120 por minuto, profundidad ≥5 cm, dejando reexpandir el tórax."],
+["arr","Atropina en bradicardia inestable:",["1 mg IV c/3–5 min","0.1 mg IV única","5 mg en bolo","10 mg IM"],0,"1 mg IV, repetir c/3–5 min (máx. 5 mg según tus diapositivas)."],
+["arr","BAV completo inestable. Tratamiento definitivo en urgencias:",["Marcapasos transvenoso temporal","Adenosina","Observación","Amiodarona"],0,"Atropina/epinefrina/dopamina como puente; marcapasos."],
+["arr","¿Por qué la atropina suele fallar en Mobitz II con QRS ancho?",["El bloqueo es infranodal (His-Purkinje), donde la atropina no actúa","Porque está contraindicada","Porque baja la FC","Porque causa FV"],0,"La atropina actúa sobre el nodo AV; si el bloqueo está por debajo, no sirve. Marcapasos."],
+["arr","¿Cuándo NO se debe hacer masaje carotídeo?",["Si hay soplo carotídeo","Si la FC es 190","Si el paciente es joven","Si es TSVP"],0,"Soplo carotídeo = riesgo de embolia; usa Valsalva modificado."],
+["arr","Reentrada significa…",["Un impulso que no se extingue y vuelve a excitar fibras ya recuperadas","Automatismo aumentado del nodo sinusal","Postpotenciales precoces","Bloqueo completo"],0,"Los 3 mecanismos: reentrada, trastornos del automatismo, actividad gatillada."],
+["arr","Cardioversión sincronizada vs desfibrilación:",["Sincronizada = con pulso; desfibrilación = sin pulso","Son lo mismo","Sincronizada = asistolia","Desfibrilación = TSVP"],0,"La sincronizada se acopla a la R para no caer en la T (con pulso). FV y TV sin pulso se desfibrilan."],
+["arr","Definición de taquicardia ventricular:",["≥3 latidos >100 lpm de origen infrahisiano con QRS >120 ms","2 extrasístoles seguidas","QRS estrecho >150 lpm","Ritmo irregular sin P"],0,"Monomórfica: QRS iguales, 100–250 lpm. Polimórfica: QRS cambiantes, 150–300 lpm."],
+["arr","T picudas, PR largo y QRS ancho. ¿Qué das primero? (complemento)",["Calcio IV","Potasio IV","Adenosina","Digoxina"],0,"Hiperkalemia: calcio IV estabiliza la membrana; luego bajar K⁺."],
+["arr","Rango de frecuencia de la TSVP:",["160–220 lpm","60–100 lpm","100–120 lpm","250–350 lpm"],0,"Inicio y fin súbitos, regular, 160–220 lpm, por reentrada nodal (TRNAV) o vía accesoria (TRAV)."],
+["arr","ECG de la FV:",["Ondas caóticas sin P, QRS ni T","QRS ancho regular","Línea plana","P sin QRS"],0,"Actividad caótica sin contracción efectiva ni pulso; es desfibrilable."],
+["arr","Causa electrolítica de arritmias que debes corregir:",["Hipo/hiperkalemia e hipomagnesemia","Hipernatremia leve","Hiperfosfatemia","Hipocloremia"],0,"K⁺ y Mg²⁺ son los más importantes; también acidosis y alteraciones tiroideas."]
+].map((x,i)=>({id:i,t:x[0],q:x[1],o:x[2],a:x[3],e:x[4]}));
+
+let topicSel=new Set(Object.keys(T));
+const chips=$("#topicChips");
+Object.entries(T).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip";b.textContent=v;b.setAttribute("aria-pressed","true");b.onclick=()=>{topicSel.has(k)?topicSel.delete(k):topicSel.add(k);b.setAttribute("aria-pressed",topicSel.has(k));};chips.appendChild(b)});
+
+let fails=new Set(store.get("cv_fails",[]));
+const updFail=()=>{$("#failCount").textContent=fails.size;$("#startFails").disabled=!fails.size};
+updFail();
+
+let exam=null;
+function startExam(list){
+  if(!list.length){$("#examArea").innerHTML='<div class="card"><p>Elige al menos un tema.</p></div>';return}
+  exam={list:list.map(q=>({q,order:shuffle(q.o.map((_,i)=>i))})),i:0,ok:0,bad:[]};
+  renderQ();
+}
+$("#startExam").onclick=()=>{const n=+$("#nQ").value;startExam(shuffle(Q.filter(q=>topicSel.has(q.t))).slice(0,n))};
+$("#startFails").onclick=()=>startExam(shuffle(Q.filter(q=>fails.has(q.id))));
+
+function renderQ(){
+  const area=$("#examArea");$("#examBar").style.width=(exam.i/exam.list.length*100)+"%";
+  if(exam.i>=exam.list.length){return renderSummary()}
+  const {q,order}=exam.list[exam.i];
+  area.innerHTML=`<article class="card">
+    <div class="meta"><span class="tag">${T[q.t]}</span><span>Pregunta ${exam.i+1} de ${exam.list.length} · ${exam.ok} correctas</span></div>
+    <p class="q">${esc(q.q)}</p>
+    <div class="opts">${order.map((oi,k)=>`<button class="opt" data-oi="${oi}"><b>${"ABCD"[k]}</b><span>${esc(q.o[oi])}</span></button>`).join("")}</div>
+    <div id="fb"></div></article>`;
+  area.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.oi));
+}
+function answer(oi){
+  const {q}=exam.list[exam.i];const right=oi===q.a;
+  document.querySelectorAll("#examArea .opt").forEach(b=>{b.disabled=true;const v=+b.dataset.oi;if(v===q.a)b.classList.add("right");else if(v===oi)b.classList.add("wrong")});
+  if(right){exam.ok++;fails.delete(q.id)}else{exam.bad.push(q);fails.add(q.id)}
+  store.set("cv_fails",[...fails]);updFail();
+  $("#fb").innerHTML=`<div class="exp ${right?"ok":"no"}"><p class="verdict ${right?"ok":"no"}">${right?"Correcto":"Incorrecto · respuesta: "+esc(q.o[q.a])}</p><p>${esc(q.e)}</p></div>
+  <div class="bar"><button class="btn" id="nextQ">${exam.i+1<exam.list.length?"Siguiente":"Ver resultado"}</button></div>`;
+  const n=$("#nextQ");n.focus();n.onclick=()=>{exam.i++;renderQ()};
+}
+function renderSummary(){
+  const n=exam.list.length,pct=Math.round(exam.ok/n*100);
+  const byT={};exam.list.forEach(({q})=>{byT[q.t]=byT[q.t]||[0,0];byT[q.t][1]++});exam.bad.forEach(q=>byT[q.t][0]++);
+  const weak=Object.entries(byT).filter(([k,[b,t]])=>b/t>=.34).map(([k])=>T[k]);
+  $("#examArea").innerHTML=`<article class="card"><h2>Resultado</h2>
+  <div class="score"><div><strong>${exam.ok}/${n}</strong><span>correctas</span></div><div><strong>${pct}%</strong><span>calificación</span></div><div><strong>${exam.bad.length}</strong><span>a repasar</span></div></div>
+  ${weak.length?`<p>Refuerza: <strong>${weak.join(", ")}</strong>.</p>`:`<p>Vas bien en todos los temas de este examen.</p>`}
+  ${exam.bad.map(q=>`<div class="fail-item"><span class="tag">${T[q.t]}</span><p><strong>${esc(q.q)}</strong></p><p>✔ ${esc(q.o[q.a])}</p><p class="note">${esc(q.e)}</p></div>`).join("")}
+  <div class="bar"><button class="btn" id="again">Otro examen</button>${exam.bad.length?'<button class="btn ghost" id="redo">Repetir sólo los fallados</button>':""}</div></article>`;
+  $("#again").onclick=()=>$("#startExam").click();
+  const r=$("#redo");if(r){const bad=exam.bad.slice();r.onclick=()=>startExam(shuffle(bad))}
+}
+
+/* ================= ECG GENERATOR ================= */
+const G=(t,c,w,a)=>{const d=(t-c)/w;return a*Math.exp(-d*d/2)};
+const sig=x=>1/(1+Math.exp(-x));
+const win=(t,a,b,k)=>sig((t-a)/k)*sig((b-t)/k);
+const Tc=rr=>Math.min(.30,.12+.35*rr);
+function qrsT(t,q,m,rr){
+  const tc=Tc(rr||.8);let y=0;
+  switch(m){
+    case "wide": y+=G(t,q+.06,.03,1.2)+G(t,q+.14,.035,-.55)+G(t,q+.36,.07,-.45);break;
+    case "vt": y+=G(t,q+.07,.04,1.3)+G(t,q+.19,.045,-.9);break;
+    case "semi": y+=G(t,q+.012,.009,-.1)+G(t,q+.045,.018,1.1)+G(t,q+.085,.018,-.35)+G(t,q+tc,.05,.28);break;
+    case "stemi": y+=G(t,q+.015,.009,-.15)+G(t,q+.04,.011,1.0)+G(t,q+.065,.01,-.05)+.32*win(t,q+.06,q+.3,.012)+G(t,q+.27,.06,.38);break;
+    case "stdep": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.2)-.18*win(t,q+.08,q+.22,.015)+G(t,q+.3,.045,-.32);break;
+    case "hyperT": y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.0)+G(t,q+.065,.01,-.2)+.06*win(t,q+.08,q+.2,.02)+G(t,q+.27,.06,.85);break;
+    case "hyperK": y+=G(t,q+.015,.012,-.08)+G(t,q+.05,.02,.95)+G(t,q+.095,.022,-.35)+G(t,q+.27,.028,1.05);break;
+    case "leadI": y+=G(t,q+.035,.011,.55)+G(t,q+.07,.014,-.65)+G(t,q+tc,.045,.2);break;
+    case "leadIII": y+=G(t,q+.015,.012,-.38)+G(t,q+.05,.012,.65)+G(t,q+.075,.01,-.1)+G(t,q+tc,.05,-.28);break;
+    default: y+=G(t,q+.012,.008,-.08)+G(t,q+.04,.011,1.1)+G(t,q+.065,.01,-.25)+G(t,q+tc,.045,.3);
+  }
+  return y;
+}
+function beats(spec,dur){
+  const ev=[];const m=spec.m||"n";
+  const reg=(rr,pr,jit)=>{let t=-1;while(t<dur+1){ev.push({p:pr==null?null:t-pr,q:t,m,rr});t+=rr+(jit?(Math.random()-.5)*jit:0)}};
+  switch(spec.r){
+    case "sinus": reg(spec.rr,spec.pr??.16,.02);break;
+    case "nop": reg(spec.rr,null,0);break;
+    case "af":{let t=-1;while(t<dur+1){const rr=.38+Math.random()*.55;ev.push({p:null,q:t,m,rr});t+=rr}break}
+    case "w1":{let t=-1.2,k=0;const prs=[.16,.26,.32];while(t<dur+1){if(k<3){ev.push({p:t,q:t+prs[k],m,rr:.8})}else ev.push({p:t,q:null});k=(k+1)%4;t+=.78}break}
+    case "w2":{let t=-1.2,k=0;while(t<dur+1){ev.push(k<2?{p:t,q:t+.16,m:"semi",rr:.8}:{p:t,q:null});k=(k+1)%3;t+=.72}break}
+    case "av3":{for(let t=-1.1;t<dur+1;t+=.62)ev.push({p:t,q:null});for(let t=-.7;t<dur+1;t+=1.55)ev.push({p:null,q:t,m:"wide",rr:1.5});break}
+  }
+  return ev;
+}
+function signal(spec,dur,fs){
+  const n=Math.round(dur*fs),y=new Float32Array(n);
+  if(spec.r==="vf"){const f=[4+Math.random()*1.5,5.5+Math.random()*1.5,7+Math.random()*2],ph=f.map(()=>Math.random()*6.28);
+    for(let i=0;i<n;i++){const t=i/fs;y[i]=(.35+.2*Math.sin(t*1.3+ph[0]))*(Math.sin(6.28*f[0]*t+ph[0])+.6*Math.sin(6.28*f[1]*t+ph[1])+.35*Math.sin(6.28*f[2]*t+ph[2]))*.7}return y}
+  if(spec.r==="tdp"){for(let i=0;i<n;i++){const t=i/fs,env=.25+1.05*Math.abs(Math.sin(Math.PI*t/2.4)),s=Math.sin(6.28*4.1*t);y[i]=env*Math.sign(s)*Math.pow(Math.abs(s),.7)}return y}
+  if(spec.r==="asys"){const ph=Math.random()*6;for(let i=0;i<n;i++){const t=i/fs;y[i]=.04*Math.sin(.9*t+ph)+.012*Math.sin(17*t)+(Math.random()-.5)*.012}return y}
+  const ev=beats(spec,dur);
+  const pAmp=spec.m==="hyperK"?.06:.15;
+  for(let i=0;i<n;i++){const t=i/fs;let v=0;
+    for(const e of ev){
+      if(e.p!=null&&Math.abs(t-e.p)<.2)v+=G(t,e.p+.045,.022,pAmp);
+      if(e.q!=null&&t>e.q-.1&&t<e.q+.6)v+=qrsT(t,e.q,e.m,e.rr);
+    }
+    if(spec.r==="af")v+=.045*(Math.sin(6.28*6.3*t)+.7*Math.sin(6.28*8.7*t+1)+.5*Math.sin(6.28*5.1*t+2));
+    v+=(Math.random()-.5)*.012;
+    y[i]=v}
+  return y;
+}
+// strip in mm: 25 mm/s, 10 mm/mV
+function stripSVG(spec,opts={}){
+  const dur=opts.dur||(innerWidth<600?4:6),H=opts.h||34,base=opts.base??(H*.6),fs=250;
+  const W=dur*25,y=signal(spec,dur,fs);
+  let pts="";for(let i=0;i<y.length;i+=1){pts+=(i/fs*25).toFixed(2)+","+(base-y[i]*10).toFixed(2)+" "}
+  const id="g"+Math.random().toString(36).slice(2,8);
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Trazo de ECG">
+  <defs><pattern id="${id}s" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0V1H0" fill="none" stroke="var(--grid-minor)" stroke-width=".08"/></pattern>
+  <pattern id="${id}b" width="5" height="5" patternUnits="userSpaceOnUse"><rect width="5" height="5" fill="url(#${id}s)"/><path d="M5 0V5H0" fill="none" stroke="var(--grid-major)" stroke-width=".18"/></pattern></defs>
+  <rect width="${W}" height="${H}" fill="var(--paper)"/><rect width="${W}" height="${H}" fill="url(#${id}b)"/>
+  ${opts.lead?`<text x="2" y="4.5" font-size="3" font-family="JetBrains Mono,monospace" fill="var(--muted)">${opts.lead}</text>`:""}
+  <polyline points="${pts}" fill="none" stroke="var(--trace)" stroke-width=".35" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+$("#hero").innerHTML=`<div style="height:46px;overflow:hidden;border-radius:6px">${stripSVG({r:"sinus",rr:.8},{dur:12,h:12,base:8})}</div>`;
+$("#hero svg").style.height="46px";$("#hero svg").style.width="100%";$("#hero svg").setAttribute("preserveAspectRatio","none");
+
+/* ================= ECG CASOS ================= */
+const E=[
+ {n:"Ritmo sinusal normal",s:[{r:"sinus",rr:.8}],lead:["DII"],ok:/(sinusal normal|ritmo sinusal$|^normal$|^ritmo normal$|^sinusal$|ecg normal)/,no:/taqui|bradi/,ctx:"Chequeo preoperatorio, asintomático.",hint:"Cuenta: ~4 cuadros grandes entre R, P antes de cada QRS, PR y QRS normales.",f:["FC ~75 lpm, regular","P antes de cada QRS, PR 0.16 s","QRS estrecho, ST isoeléctrico"],a:"Nada que tratar."},
+ {n:"Taquicardia sinusal",s:[{r:"sinus",rr:.5,pr:.14}],lead:["DII"],ok:/taqui\w* sinusal/,ctx:"Mujer con fiebre y deshidratación.",hint:"Hay P antes de cada QRS… ¿y la frecuencia?",f:["FC ~120 lpm, regular","P normal antes de cada QRS","QRS estrecho"],a:"Buscar y tratar la causa (fiebre, dolor, hipovolemia, TEP…)."},
+ {n:"Bradicardia sinusal",s:[{r:"sinus",rr:1.35}],lead:["DII"],ok:/bradi\w* sinusal/,ctx:"Deportista de 22 años, asintomático.",hint:"Todo normal salvo la distancia entre R.",f:["FC ~45 lpm","P antes de cada QRS, PR normal","QRS estrecho"],a:"Asintomático: observar. Inestable: atropina 1 mg."},
+ {n:"IAMCEST (elevación del ST)",s:[{r:"sinus",rr:.85,m:"stemi"}],lead:["V2"],ok:/iamcest|stemi|elevacion\w* (del )?st|st (elevad|ele)|supradesnivel|infarto (agudo )?con elevacion|lesion subepicardica/,ctx:"Hombre 58 años, dolor opresivo retroesternal de 40 min con diaforesis.",hint:"Fíjate en lo que pasa justo después del QRS: ¿está en la línea de base?",f:["ST↑ convexo («lomo de delfín»)","Criterio: ≥2 derivaciones contiguas (V2–V3 ≥2 mm hombre ≥40)"],a:"Reperfusión: ICP ≤90 min (fibrinólisis si no hay ICP). AAS + P2Y12 + heparina."},
+ {n:"SCASEST: depresión del ST con T invertida",s:[{r:"sinus",rr:.85,m:"stdep"}],lead:["V5"],ok:/iamsest|scasest|nstemi|sca sin elevacion|angina inestable|(depresion|descenso|infradesnivel)\w* (del )?st|st (deprim|descend|infra)|isquemia subendocardica|t invertida/,ctx:"Mujer 67 años, dolor torácico en reposo hace 2 h.",hint:"Mira el segmento entre el QRS y la T, y hacia dónde apunta la T.",f:["ST↓ horizontal","T invertida","Sin ST↑ persistente"],a:"ECG y troponina hs seriados; antiagregación + anticoagulación; estratificar riesgo. Troponina ↑ = IAMSEST; normal = angina inestable."},
+ {n:"Onda T hiperaguda (IAMCEST muy temprano)",s:[{r:"sinus",rr:.85,m:"hyperT"}],lead:["V3"],ok:/hiperagud/,ctx:"Hombre 50 años, dolor opresivo que empezó hace 15 minutos.",hint:"El QRS está bien. ¿Cómo es la T: estrecha y picuda, o alta, ancha y simétrica?",f:["T alta, ancha y simétrica","ST todavía casi isoeléctrico","Contexto de dolor de minutos"],a:"Repetir ECG en minutos; tratar como IAMCEST si evoluciona."},
+ {n:"Hiperkalemia",s:[{r:"sinus",rr:.85,pr:.24,m:"hyperK"}],lead:["V4"],ok:/hiperk|hipercalem|hiperpotas|potasio alto|k alto/,ctx:"Paciente en hemodiálisis que faltó a 2 sesiones.",hint:"La T es estrecha y en «tienda de campaña»; P casi plana, QRS algo ancho.",f:["T picudas, estrechas, simétricas","P aplanada y PR largo","QRS ensanchado"],a:"Calcio IV para estabilizar la membrana; después bajar K⁺ (complemento)."},
+ {n:"Fibrilación auricular",s:[{r:"af"}],lead:["DII"],ok:/(^| )fa( |$)|fibrilacion auricular|fibrilacion atrial|fa con respuesta/,ctx:"Mujer 74 años con palpitaciones.",hint:"¿Son iguales las distancias entre R? ¿Hay P?",f:["Irregularmente irregular","Sin ondas P; línea basal ondulante","QRS estrecho"],a:"Si inestable: cardioversión sincronizada (complemento)."},
+ {n:"Taquicardia supraventricular paroxística (TSVP)",s:[{r:"nop",rr:.31}],lead:["DII"],ok:/tsv|supraventricular|trnav|trav|reentrada (intra)?nodal/,ctx:"Mujer 29 años, palpitaciones de inicio súbito; PA 118/76.",hint:"QRS estrecho, muy rápido y perfectamente regular. ¿Ves P?",f:["~190 lpm, regular","QRS estrecho","P no visibles (ocultas)"],a:"Estable: vagales → adenosina 6 mg → 12 mg. Inestable: cardioversión sincronizada."},
+ {n:"Taquicardia ventricular monomórfica",s:[{r:"nop",rr:.3,m:"vt"}],lead:["DII"],ok:/(^| )tv( |$)|taquicardia ventricular|tv monomorf/,no:/polimorf|torsad|fibril/,ctx:"Hombre 70 años con infarto antiguo, palpitaciones y mareo.",hint:"QRS ancho (>3 cuadros chicos), regular y rápido; todos iguales.",f:["~200 lpm, regular","QRS ancho (>120 ms), todos iguales","Sin P visibles"],a:"Sin pulso: desfibrilar. Inestable: cardioversión sincronizada. Estable: procainamida o amiodarona 150 mg."},
+ {n:"TV polimórfica (torsades de pointes)",s:[{r:"tdp"}],lead:["DII"],ok:/torsad|torcid|puntas|polimorf/,ctx:"Mujer con QT largo por fármacos; síncope.",hint:"La amplitud crece y decrece como girando alrededor de la línea.",f:["QRS ancho que «gira» alrededor de la basal","Amplitud variable","Muy rápida"],a:"Sin pulso o sostenida: choque NO sincronizado. Magnesio IV, corregir K⁺ y QT."},
+ {n:"Fibrilación ventricular",s:[{r:"vf"}],lead:["DII"],ok:/(^| )fv( |$)|fibrilacion ventricular/,ctx:"Hombre se desploma en sala de espera; sin pulso.",hint:"¿Puedes identificar P, QRS o T?",f:["Ondas caóticas, sin P, QRS ni T","Sin pulso"],a:"Desfibrilar de inmediato (200 J bifásico) + RCP. Adrenalina tras 2.º choque, amiodarona 300 mg tras el 3.º."},
+ {n:"Asistolia",s:[{r:"asys"}],lead:["DII"],ok:/asistol|linea (isoelectrica|plana)/,ctx:"Paciente sin pulso; confirmas en 2 derivaciones y revisas cables y ganancia.",hint:"Casi no hay nada que medir.",f:["Línea casi plana","Sin actividad ventricular ni pulso"],a:"NO desfibrilar. RCP + adrenalina 1 mg c/3–5 min y tratar causas."},
+ {n:"BAV de 1.er grado",s:[{r:"sinus",rr:.95,pr:.32}],lead:["DII"],ok:/(primer|1 ?(er|ro)?|i) grado|bav (1|i)\b|bloqueo (av )?(de )?(1|primer)/,no:/mobitz|segundo|tercer|wenck/,ctx:"Hombre 60 años asintomático, toma β-bloqueador.",hint:"Todas las P conducen. Mide la distancia entre P y QRS.",f:["PR >0.20 s (aquí ~0.32 s), constante","Todas las P seguidas de QRS"],a:"Observar y corregir causa."},
+ {n:"BAV 2.º grado Mobitz I (Wenckebach)",s:[{r:"w1"}],lead:["DII"],ok:/wenc?k?ebach|wenkebach|mobitz (tipo )?(1|i)\b|segundo grado tipo (1|i)\b|2 ?(do|o)? grado tipo (1|i)\b|mobitz uno/,ctx:"Mujer 66 años con IAM inferior, mareo leve.",hint:"Mide el PR latido por latido antes de la P que no conduce.",f:["PR que se alarga progresivamente","Una P sin QRS y el ciclo se reinicia","QRS estrecho"],a:"Asintomático: observar. Con compromiso: atropina 1 mg, marcapasos transcutáneo."},
+ {n:"BAV 2.º grado Mobitz II",s:[{r:"w2"}],lead:["DII"],ok:/mobitz (tipo )?(2|ii)\b|segundo grado tipo (2|ii)\b|2 ?(do|o)? grado tipo (2|ii)\b|mobitz dos/,ctx:"Hombre 72 años con síncopes.",hint:"Mira si el PR cambia antes de la P bloqueada.",f:["PR fijo","P que de pronto no conduce","QRS algo ancho (infranodal)"],a:"Monitor + marcapasos. La atropina suele fallar."},
+ {n:"BAV de 3.er grado (completo)",s:[{r:"av3"}],lead:["DII"],ok:/(tercer|3 ?(er|ro)?) grado|completo|disociacion (av|auriculoventricular)/,ctx:"Mujer 80 años, FC 38, confusa, PA 80/50.",hint:"Marca las P con una regla. ¿Tienen alguna relación con los QRS?",f:["P regulares (~95/min) y QRS regulares lentos (~39/min)","Sin relación entre P y QRS","QRS ancho (escape ventricular)"],a:"Inestable: marcapasos (transvenoso temporal); atropina/epinefrina/dopamina de puente."},
+ {n:"TEP: taquicardia sinusal con S1Q3T3",s:[{r:"sinus",rr:.52,pr:.14,m:"leadI"},{r:"sinus",rr:.52,pr:.14,m:"leadIII"}],lead:["DI","DIII"],ok:/(^| )tep( |$)|tromboembolia|embolia pulmonar|tromboembolismo|s1 ?q3 ?t3/,ctx:"Mujer 2 semanas posparto, disnea súbita y dolor pleurítico; SatO₂ 88%.",hint:"Compara DI y DIII: S profunda en una, Q y T negativa en la otra.",f:["Taquicardia sinusal (~115 lpm)","S profunda en DI","Q y T invertida en DIII"],a:"Probabilidad alta → AngioTAC y anticoagular. Inestable → alteplasa 100 mg en 2 h."}
+];
+let ctxOn=store.get("cv_ctx",true);
+const ctxBtn=$("#ctxToggle");ctxBtn.setAttribute("aria-pressed",ctxOn);
+ctxBtn.onclick=()=>{ctxOn=!ctxOn;store.set("cv_ctx",ctxOn);ctxBtn.setAttribute("aria-pressed",ctxOn);const c=document.querySelector("#ecgArea .ctx");if(c)c.hidden=!ctxOn};
+let ecg={deck:shuffle(E.map((_,i)=>i)),i:0,ok:0,done:0,answered:false};
+function renderECG(){
+  if(ecg.i>=ecg.deck.length){$("#ecgArea").innerHTML=`<div class="card"><h2>Terminaste los ${E.length} trazos</h2><div class="score"><div><strong>${ecg.ok}/${ecg.done}</strong><span>identificados a la primera</span></div></div><div class="bar"><button class="btn" id="ecgRestart">Barajar de nuevo (trazos nuevos)</button></div></div>`;$("#ecgRestart").onclick=()=>{ecg={deck:shuffle(E.map((_,i)=>i)),i:0,ok:0,done:0};renderECG()};return}
+  const c=E[ecg.deck[ecg.i]];ecg.answered=false;ecg.tries=0;
+  $("#ecgBar").style.width=(ecg.i/ecg.deck.length*100)+"%";
+  $("#ecgScore").textContent=`Trazo ${ecg.i+1} de ${E.length} · ${ecg.ok} a la primera`;
+  $("#ecgArea").innerHTML=`<article class="card">
+    ${c.s.map((s,k)=>`<div class="ecg-box">${stripSVG(s,{lead:c.lead[k]})}</div>`).join("")}
+    <p class="ctx" ${ctxOn?"":"hidden"}>${esc(c.ctx)}</p>
+    <form class="answer-row" id="ecgForm" autocomplete="off"><input id="ecgInput" placeholder="¿Qué es? ej. «BAV completo»" aria-label="Tu diagnóstico"><button class="btn" type="submit">Revisar</button></form>
+    <div class="bar"><button class="btn quiet" id="ecgHint">Pista</button><button class="btn quiet" id="ecgOpts">Ver 4 opciones</button><button class="btn quiet" id="ecgGive">Me rindo</button><button class="btn quiet" id="ecgRedraw">Otro trazo igual</button></div>
+    <div id="ecgFb"></div></article>`;
+  $("#ecgInput").focus({preventScroll:true});
+  $("#ecgForm").onsubmit=e=>{e.preventDefault();const v=$("#ecgInput").value;if(!v.trim())return;check(c,v)};
+  $("#ecgHint").onclick=()=>{$("#ecgFb").innerHTML=`<p class="hint">${esc(c.hint)}</p>`};
+  $("#ecgGive").onclick=()=>reveal(c,false,"");
+  $("#ecgRedraw").onclick=()=>{const boxes=document.querySelectorAll("#ecgArea .ecg-box");c.s.forEach((s,k)=>boxes[k].innerHTML=stripSVG(s,{lead:c.lead[k]}))};
+  $("#ecgOpts").onclick=()=>{
+    const others=shuffle(E.filter(x=>x!==c)).slice(0,3),opts=shuffle([c,...others]);
+    $("#ecgFb").innerHTML=`<div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${E.indexOf(o)}"><b>${"ABCD"[k]}</b><span>${esc(o.n)}</span></button>`).join("")}</div>`;
+    document.querySelectorAll("#ecgFb .opt").forEach(b=>b.onclick=()=>{const right=E[+b.dataset.k]===c;b.classList.add(right?"right":"wrong");if(right){setTimeout(()=>reveal(c,true,"(con opciones)"),250)}else{ecg.tries++}});
+  };
+}
+function check(c,v){
+  const s=norm(v);const right=c.ok.test(s)&&!(c.no&&c.no.test(s));
+  if(right)reveal(c,true,"");else{ecg.tries++;$("#ecgFb").innerHTML=`<p class="verdict no">No es «${esc(v)}». Intenta otra vez, pide una pista o mira las opciones.</p>`}
+}
+function reveal(c,right,note){
+  if(ecg.answered)return;ecg.answered=true;ecg.done++;if(right&&ecg.tries===0&&!note)ecg.ok++;
+  $("#ecgFb").innerHTML=`<div class="exp ${right?"ok":"no"}"><p class="verdict ${right?"ok":"no"}">${right?"Correcto":"Era:"} ${esc(c.n)} ${note}</p>
+  <dl class="kv"><dt>Lo ves por</dt><dd><ul class="feat">${c.f.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></dd><dt>Haces</dt><dd>${esc(c.a)}</dd></dl></div>
+  <div class="bar"><button class="btn" id="ecgNext">Siguiente trazo</button></div>`;
+  document.querySelectorAll("#ecgArea input, #ecgArea form button").forEach(x=>x.disabled=true);
+  const n=$("#ecgNext");n.focus();n.onclick=()=>{ecg.i++;renderECG()};
+}
+
+/* ================= REPASO ================= */
+const PLAN=[
+ "Bloque 1 · Bases del ECG: papel, 6 preguntas, qué pared ve cada derivación. Luego tab «¿Qué ECG es?» hasta acertar los trazos normales y de SCA.",
+ "Bloque 2 · Síndromes coronarios: tabla AI / IAMSEST / IAMCEST, criterios de ST↑, tiempos (10 min, 90/120 min), dosis. Examen sólo de «Síndromes coronarios».",
+ "Bloque 3 · Arritmias: algoritmos (pulso → estabilidad → ancho/estrecho), bloqueos AV, paro. Trazos de arritmias hasta identificarlos todos.",
+ "Bloque 4 · TEP + choque cardiogénico + EAP: cadenas causales y tratamiento. Examen de esos 3 temas.",
+ "Bloque 5 · Examen de 40 preguntas de todo. Después «Sólo mis fallos» hasta dejarlo en 0.",
+ "Último repaso: «Trampas de examen» y «Números clave». Luego a dormir.",
+ "Mañana antes del examen (10 min): tarjetas rápidas, nada nuevo."
+];
+let planDone=new Set(store.get("cv_plan",[]));
+$("#planList").innerHTML=PLAN.map((p,i)=>`<label class="check ${planDone.has(i)?"done":""}" for="plan${i}"><input type="checkbox" id="plan${i}" ${planDone.has(i)?"checked":""}><span>${esc(p)}</span></label>`).join("");
+PLAN.forEach((_,i)=>{$("#plan"+i).onchange=e=>{e.target.checked?planDone.add(i):planDone.delete(i);e.target.parentElement.classList.toggle("done",e.target.checked);store.set("cv_plan",[...planDone])}});
+
+const F=[
+ ["ecg","Cuadro chico / cuadro grande","0.04 s / 0.20 s · FC = 300 ÷ cuadros grandes"],
+ ["ecg","PR normal · QRS normal","PR 0.12–0.20 s · QRS <0.12 s"],
+ ["ecg","Inferior / lateral / anterior","II, III, aVF (CD) · I, aVL, V5–V6 (Cx) · V1–V4 (DA)"],
+ ["ecg","VD y posterior","V3R–V4R · V7–V9 (espejo: ST↓ en V1–V3)"],
+ ["choque","Choque cardiogénico: criterios clínicos","PAS <90 ≥30 min, diuresis <30 mL/h, extremidades frías"],
+ ["choque","Choque cardiogénico: hemodinámicos","IC ≤2.2 L/min/m² y PCP >15 mmHg"],
+ ["choque","Vasopresor / inotrópico de elección","Norepinefrina / dobutamina (evitar dopamina)"],
+ ["choque","Lactato y pH que apoyan choque","Lactato >2 mmol/L, pH <7.2"],
+ ["choque","SCAI A–E","A en riesgo · B pre-shock · C clásico · D deterioro · E extremo/paro"],
+ ["choque","Tratamiento definitivo","Revascularizar el vaso culpable (ICP; CABG si anatomía)"],
+ ["eap","EAP: tratamiento en 3","CPAP/BiPAP + furosemida IV + nitroglicerina IV (+ tratar causa)"],
+ ["eap","Rx de EAP","Alas de mariposa, Kerley B, cardiomegalia >0.5, derrame"],
+ ["eap","EAP cardiogénico vs no cardiogénico","↑ presión hidrostática vs ↑ permeabilidad (sepsis, SDRA)"],
+ ["sca","ST↑ en V2–V3","H <40: ≥2.5 mm · H ≥40: ≥2 mm · M: ≥1.5 mm · otras ≥1 mm"],
+ ["sca","Tiempos del SCA","ECG ≤10 min · ICP ≤90 min (≤120 transferido)"],
+ ["sca","Troponina T","Sube 4–6 h · pico 12–24 h · dura 7–10 días · >p99"],
+ ["sca","Carga antiplaquetaria","AAS 150–300 mg + ticagrelor 180 mg o clopidogrel 300 mg"],
+ ["sca","HNF bolo en SCA (diapositivas)","IAMCEST 100 U/kg · SCASEST 60–70 U/kg"],
+ ["sca","Nitroglicerina SL","0.4 mg c/5 min × 3"],
+ ["sca","Angina inestable vs IAMSEST","Troponina normal vs elevada"],
+ ["sca","Alto riesgo en ECG","ST↓ ≥6 derivaciones + ST↑ aVR/V1 → tronco o multivaso"],
+ ["tep","TEP: algoritmo diagnóstico","Probabilidad → dímero D (baja/intermedia) → AngioTAC"],
+ ["tep","TEP: clasificación","Alto (inestable) · intermedio (VD o biomarcadores) · bajo"],
+ ["tep","ECG en TEP","Taquicardia sinusal (más frecuente), S1Q3T3, BRD, T invertida V1–V4"],
+ ["tep","Anticoagulantes en TEP","HNF 80 UI/kg · enoxaparina 1 mg/kg c/12 h · rivaroxabán 15 mg c/12 h · apixabán 10 mg c/12 h"],
+ ["tep","Trombólisis en TEP","Alteplasa 100 mg en 2 h (alto riesgo)"],
+ ["tep","Fondaparinux por peso","<50 kg 5 mg · 50–100 kg 7.5 mg · >100 kg 10 mg c/24 h"],
+ ["arr","FV / TV sin pulso","Desfibrilar 200 J bifásico · adrenalina tras 2.º choque · amiodarona 300 mg tras 3.º"],
+ ["arr","Asistolia","NO desfibrilar · RCP + adrenalina 1 mg c/3–5 min"],
+ ["arr","TSVP estable","Vagales → adenosina 6 mg → 12 mg"],
+ ["arr","TV estable","Procainamida 20–50 mg/min (máx 17 mg/kg) o amiodarona 150 mg en 10 min"],
+ ["arr","Taquicardia inestable con pulso","Cardioversión sincronizada"],
+ ["arr","Bradicardia inestable","Atropina 1 mg c/3–5 min · marcapasos · epinefrina 2–10 µg/min · dopamina 5–20 µg/kg/min"],
+ ["arr","Mobitz I vs II","I: PR se alarga y cae · II: PR fijo y cae (marcapasos)"],
+ ["arr","RCP de calidad","100–120/min · ≥5 cm"],
+ ["arr","H y T","Hipovolemia, hipoxia, H⁺, K⁺, hipotermia · tensión (neumotórax), taponamiento, tóxicos, trombosis coronaria/pulmonar"]
+];
+let fTopic="all",fDeck=[],fCur=null,fShown=false;
+const ft=$("#flashTopics");
+[["all","Todos"],...Object.entries(T)].forEach(([k,v])=>{const b=document.createElement("button");b.className="chip";b.textContent=v;b.dataset.k=k;b.setAttribute("aria-pressed",k===fTopic);b.onclick=()=>{fTopic=k;ft.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===k));resetFlash()};ft.appendChild(b)});
+function resetFlash(){fDeck=shuffle(F.filter(f=>fTopic==="all"||f[0]===fTopic));nextFlash()}
+function nextFlash(){fCur=fDeck.shift()||null;fShown=false;drawFlash()}
+function drawFlash(){
+  const c=$("#flashCard");
+  $("#flashLeft").textContent=fCur?`Quedan ${fDeck.length+1}`:"";
+  if(!fCur){c.innerHTML=`<p class="front">Mazo terminado</p><p class="note">Pulsa «Reiniciar mazo» para repasar otra vez.</p>`;$("#flashMeta").textContent="";$("#flashKnew").disabled=$("#flashAgain").disabled=true;return}
+  $("#flashKnew").disabled=$("#flashAgain").disabled=false;
+  $("#flashMeta").textContent=T[fCur[0]];
+  c.innerHTML=`<p class="front">${esc(fCur[1])}</p>${fShown?`<p class="back">${esc(fCur[2])}</p>`:`<p class="note">Toca para ver</p>`}`;
+}
+const flip=()=>{if(fCur){fShown=!fShown;drawFlash()}};
+$("#flashCard").onclick=flip;$("#flashCard").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}};
+$("#flashKnew").onclick=nextFlash;
+$("#flashAgain").onclick=()=>{if(fCur){fDeck.splice(Math.min(3,fDeck.length),0,fCur)}nextFlash()};
+$("#flashReset").onclick=resetFlash;
+resetFlash();
+
+const TBL=[["ST↑ persistente en derivaciones contiguas; BRI/BRD nuevo con isquemia","IAMCEST","Reperfusión (ICP ≤90 min; fibrinólisis si no hay ICP); AAS + P2Y12 + HNF"],
+["ST↓, T invertida o ECG normal con dolor típico","IAMSEST / angina inestable","ECG y troponina seriados; antiagregar + anticoagular; estratificar"],
+["T alta, ancha y simétrica con dolor","T hiperaguda (IAMCEST inicial)","Repetir ECG en minutos"],
+["Taquicardia sinusal ± S1Q3T3, BRD, T invertida V1–V4","TEP","Probabilidad → AngioTAC; anticoagular"],
+["QRS ancho, regular, rápido","TV monomórfica","Sin pulso: desfibrilar · inestable: cardioversión · estable: procainamida/amiodarona"],
+["QRS ancho que «gira»","Torsades","Choque no sincronizado si sin pulso; magnesio IV"],
+["QRS estrecho, regular, 160–220, sin P","TSVP","Vagales → adenosina 6 → 12 mg"],
+["Irregularmente irregular sin P","FA","Inestable: cardioversión sincronizada"],
+["PR >0.20 s constante","BAV 1.er grado","Observar"],
+["PR que se alarga y cae un QRS","Mobitz I","Observar; atropina si síntomas"],
+["PR fijo y cae un QRS, QRS ancho","Mobitz II","Monitor + marcapasos"],
+["P y QRS sin relación, QRS lento","BAV completo","Marcapasos; atropina/epinefrina/dopamina de puente"],
+["Ondas caóticas sin QRS","FV","Desfibrilar + RCP"],
+["Línea plana (confirmar)","Asistolia","RCP + adrenalina; NO desfibrilar"],
+["T picudas, PR largo, QRS ancho","Hiperkalemia","Calcio IV; bajar K⁺"]];
+$("#ecgTable").innerHTML=TBL.map(r=>`<tr><td>${esc(r[0])}</td><td><strong>${esc(r[1])}</strong></td><td>${esc(r[2])}</td></tr>`).join("");
+
+const NUMS=[["≤10 min","ECG en dolor torácico"],["≤90 min","ICP primaria (≤120 si transferido)"],["<90 mmHg","PAS ≥30 min en choque cardiogénico"],["≤2.2 / >15","IC (L/min/m²) / PCP (mmHg) en choque"],[">65 mmHg","PAM objetivo"],["<90%","SatO₂ para dar O₂ en SCA"],["2 / 2.5 / 1.5 mm","ST↑ V2–V3: H ≥40 / H <40 / mujer"],["p99","Corte de troponina hs"],["~95%","TEP que vienen de TVP"],["100 mg / 2 h","Alteplasa en TEP"],["200 J","Desfibrilación bifásica"],["300 → 150 mg","Amiodarona en FV"],["1 mg c/3–5 min","Adrenalina en paro"],["6 → 12 mg","Adenosina en TSVP"],["100–120 · ≥5 cm","Compresiones"],["0.12–0.20 s","PR normal"],["<0.12 s","QRS estrecho"],["160–220 lpm","TSVP"]];
+document.getElementById("sub-nums").innerHTML=NUMS.map(n=>`<div class="num"><strong>${esc(n[0])}</strong><span>${esc(n[1])}</span></div>`).join("");
+
+/* ================= NAV ================= */
+const tabs=document.querySelectorAll("nav.tabs button");
+function showTab(k){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===k));["examen","ecg","repaso"].forEach(x=>$("#p-"+x).hidden=x!==k);store.set("cv_tab",k);if(k==="ecg"&&!document.querySelector("#ecgArea article, #ecgArea .card"))renderECG()}
+tabs.forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+const subs=document.querySelectorAll("#subnav .chip");
+function showSub(k){subs.forEach(b=>b.setAttribute("aria-pressed",b.dataset.sub===k));["plan","flash","algo","tabla","nums","trampas"].forEach(x=>$("#sub-"+x).hidden=x!==k);store.set("cv_sub",k)}
+subs.forEach(b=>b.onclick=()=>showSub(b.dataset.sub));
+showSub(store.get("cv_sub","plan"));
+const h=(location.hash||"").slice(1);
+showTab(["examen","ecg","repaso"].includes(h)?h:store.get("cv_tab","examen"));
+$("#startExam").click();
+})();
+</script>
