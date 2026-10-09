@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GastroLab</title>
+<meta name="description" content="Plataforma personal de estudio de Gastroenterología: lecciones, flashcards, simulacro, casos clínicos y progreso.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
+  <span class="brand-sm">Gastro<b>Lab</b></span>
+</header>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación principal">
+  <div class="brand">Gastro<b>Lab</b><small>Estudio de Gastroenterología</small></div>
+  <ul class="nav">
+    <li><a href="#/inicio" data-nav="inicio"><span aria-hidden="true">◎</span>Inicio</a></li>
+    <li><a href="#/temario" data-nav="temario"><span aria-hidden="true">▤</span>Aprender</a></li>
+    <li><a href="#/flashcards" data-nav="flashcards"><span aria-hidden="true">▢</span>Flashcards</a></li>
+    <li><a href="#/simulacro" data-nav="simulacro"><span aria-hidden="true">✓</span>Simulacro</a></li>
+    <li><a href="#/casos" data-nav="casos"><span aria-hidden="true">✚</span>Casos clínicos</a></li>
+    <li><a href="#/comparador" data-nav="comparador"><span aria-hidden="true">⇄</span>Comparador</a></li>
+    <li><a href="#/errores" data-nav="errores"><span aria-hidden="true">!</span>Mis errores</a></li>
+    <li><a href="#/repaso" data-nav="repaso"><span aria-hidden="true">⚡</span>Repaso rápido</a></li>
+    <li><a href="#/progreso" data-nav="progreso"><span aria-hidden="true">≡</span>Progreso y datos</a></li>
+  </ul>
+  <p class="side-note">Fuente única: tu guía de estudio. Sin conexión, sin cuentas.</p>
+</nav>
+<div class="scrim" id="scrim" hidden></div>
+
+<main id="main" tabindex="-1"></main>
+
+<dialog id="dlg" aria-labelledby="dlgMsg">
+  <form method="dialog">
+    <p id="dlgMsg"></p>
+    <div class="row end">
+      <button class="btn ghost" value="no">Cancelar</button>
+      <button class="btn" value="ok" id="dlgOk">Aceptar</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
